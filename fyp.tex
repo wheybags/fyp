@@ -1,0 +1,88 @@
+\documentclass[a4paper]{article}
+
+\usepackage{url}
+
+\title{Isometric Hack and Slash Game Engine}
+\author{Tom Mason - 10329877\\Supervisor: Mads Haahr}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The purpose of the project is to create a modern open source reimplementation of the engine used in the 1996 video game Diablo.\\
+It will use the original data files, so as to avoid issues with copyright, but will also
+support modern file formats, and be a generic engine for games of that style.\\
+The original game is an isometric top down hack and slash game, which features some roguelike elements, such as
+random items and dungeons. These will be a focus of the project.
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Background Research}
+    \subsection{Relevant existing FOSS Isometric Engines}
+    	\subsubsection{Flare Isometric Engine}
+    	Flare\cite{flare} is an open source isometric hack and slash game engine. It uses the SDL library for displaying graphics, and simple text based file formats.
+    	It does not appear to have any embedded scripting language.
+    	
+    	\subsubsection{Holyspirit}
+    	Holyspirit\cite{holyspirit} claims to be in alpha. It uses the SFML library. Does not appear to support networking.
+    	Developed in French.
+    	
+    	\subsubsection{Fifengine}
+    	Fifengine\cite{fife} (Flexible Isometric Free Engine) is a FOSS generic isometric game engine.
+    	It supports python scripting, and the UI is skinnable with xml.
+    	It uses SDL and opengl. It does not support networking.
+    	
+    	\subsubsection{ProjectDDT}
+    	ProjectDDT\cite{ddt} is an existing attempt to create a modern FOSS engone for Diablo.
+    	It has been abandoned now since 2011.
+    	I have decided to create my own project, in favour of continuing work on this, because it is extremely badly engineered.
+    	For example: the creator of this work decided not to use header files, but simply placed function declarations at the start of files where he needed them.
+    	The code is also just generally not very readable, and he has a tendency to not create classes where they would have been appropriate.
+    	It is however, very useful as a reference, as it is under the GPL.
+    	It contains code for loading and interpreting several diablo file formats, which while hard to follow, is still extremely useful.
+    
+    \subsection{Design Choices}
+    The engine should support python scripting, to allow entension of the engine, and of games created forthe engine.
+    File formats used by the game should be simple text formats, like the formats used in Fifengine.
+    The engine should be divided into a number of module.
+    
+    \newpage
+    
+    \subsection{Libraries}
+        \subsubsection{2d graphics libraries}
+    	There seems to be 3 different options for 2d graphics in C++:
+    	\begin{itemize}
+    	    \item{SDL}
+    	    \item{Allegro}
+    	    \item{SFML}
+    	\end{itemize}
+    	
+    	Of the above, all are written in plain C, except Allegro, which is C++.
+    	I have decided to use SDL for this project, as I am already familiar with it.
+    	More specifically, I have decided to use SDL 1.
+    	SDL 2 has been released, but is not yet packaged in most distros. 
+    	The intent is to write an SDL backend, which will eventually support either SDL1 or 2.
+    	
+    	\subsubsection{Cross Platform}
+        The Boost C++ library addressess many of the problems with writing portable C++ code today.
+        Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
+        Even with boost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
+        
+        \subsubsection{Audio}
+        SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
+        FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
+        OpenAL seems to be popular also, but is no longer FOSS.
+    
+\newpage
+    
+\bibliographystyle{plain}
+\bibliography{references}
+
+
+
+\end{document}
