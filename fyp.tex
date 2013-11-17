@@ -1,6 +1,22 @@
 \documentclass[a4paper]{article}
 
 \usepackage{url}
+\usepackage{listings}
+
+\newcommand{\subsubsubsection}[1] 
+{
+	\paragraph{#1}
+	\mbox{}\\
+	
+	\noindent
+}
+
+\setcounter{secnumdepth}{5}	
+\setcounter{tocdepth}{5}
+
+\lstloadlanguages{C++}
+\lstset{language=C++, breaklines=true}
+
 
 \title{Isometric Hack and Slash Game Engine}
 \author{Tom Mason - 10329877\\Supervisor: Mads Haahr}
@@ -71,15 +87,89 @@ random items and dungeons. These will be a focus of the project.
     	\subsubsection{Cross Platform}
         The Boost C++ library addressess many of the problems with writing portable C++ code today.
         Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
-        Even with boost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
+        Even with bo	ost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
         
         \subsubsection{Audio}
         SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
         FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
         OpenAL seems to be popular also, but is no longer FOSS.
-    
 \newpage
+\section{File Formats}
+In the following section, I will use stdint.h style names for naming datatypes with exact bit width.
+
+\subsection{CEL image files}
+	CEL image files use the CEL and CL2 file extensions. There are some minor differences between the two, but they are fundamentally the same. The basic capabilities of the format are run length encoding, and transparency (but only total transparency, not partial). Each file can contain multiple frames that can represent parts of an object, frames in an animation, or even tilesets for levels.
+
+	\subsubsection{File Header}
+	The file header is composed of a series of uint32\_t. The first is the number of frames. This is followed by an offset from the start of the file for each frame, and finally, an offset to the end of the file. Illustrated below is a pseudo-C struct representing it's structure.
+	\begin{lstlisting}
+struct fileHeader
+{
+	uint32_t numFrames;
+	uint32_t frameOffsets[numFrames];
+	uint32_t endOffset;
+};
+	\end{lstlisting}
+	
+	
+	\subsubsection{CEL Frames}
+	There are two kinds of plain CEL frame. One is the "normal" kind, which contains animations of objects. Examples of these can be found in the items directory in DIABDAT.MPQ. The other is tileset cel frames. As the name implies, these contain the tilesets for levels. These are found only in levels/*/*.cel.
+	A given CEL file will only conatin one of these types, not both.
+
+	\subsubsubsection{Normal CEL Frames}
+	Normal Frames are composed of a series of command and data blocks.
+	Each block is a uint8\_t.
+	The command blocks contain instructions about what to do next during decoding. The data blocks contain indices into a palette to obtain a colour value.
+	
+	Decoding is performed by starting at the start of the file (the first block will always be a control block), and executing the command there. 
+	\\Then you advance by the number of blocks specified by the current block, which brings you to the next control block, and so on until you have decoded the entire frame. There are two kinds of control block: Regular and Transparency.
+	
+	\emph{Regular blocks} are denoted by values $\leq 127$. When you encounter a regular block, it's value indicates how many pixels it contains. For example, if you encounter a Regular block with value 10, the next 10 blocks are data blocks, one pixel each, and the 11th block after is the next control block.
+	
+	\emph{Transparency blocks} are denoted by values $> 127$. When a transparency block is encountered, it indicates $256-$block value transparent pixels. Transparency blocks do no use any data blocks, and so the immediate next block is the next control block.
+	
+	Below is a sample implementation of decoding a frame.
+	
+	\begin{lstlisting}
+// Frame is the raw frame from the file, pal is a palette
+// raw_image is the destination for decoded pixels
+void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw_image)
+{
+    size_t i = 0;
     
+    for(; i < frame.size(); i++)
+    {   
+        // Regular command
+        if(frame[i] <= 127)
+        {    
+            size_t j;
+            // Just push the number of pixels specified by the command
+            for(j = 1; j < frame[i]+1 && i+j < frame.size(); j++)
+            {
+                int index = i+j;
+                uint8_t f = frame[index];
+                colour col = pal[f];
+                raw_image.push_back(col);
+            }
+    
+            i+= frame[i];
+        }
+
+        // Transparency command
+        else if(128 <= frame[i])
+        {
+            // Push (256 - command value) transparent pixels
+            for(size_t j = 0; j < 256-frame[i]; j++)
+                raw_image.push_back(transparentColour()));
+        }
+    }
+}
+	\end{lstlisting}
+	\newpage
+	
+   
+\newpage
+
 \bibliographystyle{plain}
 \bibliography{references}
 
