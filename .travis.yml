@@ -1,0 +1,18 @@
+before_install:
+- pwd
+- git submodule update --init --recursive
+- sudo apt-get update -qq
+- sudo apt-get install -qq texlive-full
+script:
+- make
+after_success:
+- ./update-gh-pages.sh
+notifications:
+  recipients:
+  - wheybags+travis.ci@wheybags.com
+  email:
+    on_success: change
+    on_failure: always
+env:
+  global:
+    secure: ZE+I7FZgFTb0Zf4cbtPnIszwmXchJvuP6WCdwQ7ro+SHDoBBs1d4sEhtHb4ZtV2z3JQxz/hqS/uWPtAKIuvXDKLMLMWgIxej4wTRfqopix7QZCZM9SQHgiy7KJRoHWoCa27eye9izIL6ck29Vf4F8GTwTBbKWKiXfyYG1uglRto=
