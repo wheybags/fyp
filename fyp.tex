@@ -103,6 +103,7 @@ In the following section, I will use stdint.h style names for naming datatypes w
 	CEL image files use the CEL and CL2 file extensions. There are some minor differences between the two, but they are fundamentally the same. The basic capabilities of the format are run length encoding, and transparency (but only total transparency, not partial). Each file can contain multiple frames that can represent parts of an object, frames in an animation, or even tilesets for levels.
 
 	\subsubsection{File Header}
+	\label{sec:fileheaders}
 	The file header is composed of a series of uint32\_t. The first is the number of frames. This is followed by an offset from the start of the file for each frame, and finally, an offset to the end of the file. Illustrated below is a pseudo-C struct representing it's structure.
 	\begin{lstlisting}
 struct fileHeader
@@ -272,6 +273,13 @@ void cl2Decode(const std::vector<uint8_t>& frame,
  	The maximum stretch of a Regular block is 127. A block will never straddle two lines, so if for example a frame were of width 130, there would be a series of 127 blocks followed by 3 blocks, one pair for each line.
  	
  	We can abuse this fact, by starting at the start of the frame, and adding together each command block until we find one that is not 127. At that point the sum of the previous 127s + the current block is the width of the image, as the current block has to exist to split on a line.
+ 	
+ 	\subsubsection{CEL Archives}
+ 	Some CEL and CL2 files are in fact archives of multiple CEL/CL2 files, respectively. These are used to store multiple rotations of an animation (eg walk animation in all 8 possible directions). These files have headers at the start, which consist of a number of uint32\_t s, each one pointing to a file contained in the archive.
+ 	
+ 	As there is always 8 images in such files, the first pointer will always be 32, as it will always point to the first byte after the headers, which are 8*4=32 bytes long, so it is possible to tell which files are archives by checking the first uint32\_t against 32.
+ 	
+ 	For CEL files, that's all there is to it, but for CL2, it's a little more complicated. The archive header on CL2 archives points not to the data, but to the individual file headers (described in section \ref{sec:fileheaders}), which then point to the frames, relative to their own position.
 \newpage
 
 \bibliographystyle{plain}
