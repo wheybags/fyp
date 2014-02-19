@@ -196,6 +196,67 @@ The yellow blocks are the bytes in between the markers, which contain colour ind
 	If these markers are not present, however, the second half is raw with no transparency, so we can just pull it out directly, eg:\\
 	\includegraphics[scale=0.5]{rawtop}
 \end{itemize}
+
+\newpage
+
+\subsubsection{CL2 Frames}
+	CL2 Frames are very similar to CEL frames, with the main difference that the use run-length encoding for colours as well as tranparency. They also always have frame headers.
+   In addition to the regular and transparency blocks used in normal CEL frames, they also have RLE blocks, which indicate the number of times to repeat the colour indicated by the next block.
+   Below is some C++ code that illustrates this:
+   
+   \begin{lstlisting}
+void cl2Decode(const std::vector<uint8_t>& frame, 
+   const Pal& pal, std::vector<Colour>& rawImage)
+{
+    size_t i = 10; // CL2 frames always have headers
+
+    for(; i < frame.size(); i++)
+    {
+        // Color command
+        if(frame[i] > 127)
+        {
+            uint8_t val = 256 - frame[i];
+           
+            // Regular command
+            if(val <= 65)
+            {
+                size_t j;
+                // Just push the number of pixels specified by the command
+                for(j = 1; j < val+1 && i+j < frame.size(); j++)
+                {
+                    int index = i+j;
+                    uint8_t f = frame[index];
+
+                    Colour col = pal[f];
+
+                    rawImage.push_back(col);
+                }
+              
+                i+= val;
+            }
+
+            // RLE (run length encoded) Colour command
+            else
+            {
+                for(int j = 0; j < val-65; j++)
+                    rawImage.push_back(pal[frame[i+1]]);
+          
+                i += 1;
+            }
+        }
+        
+        // Transparency command
+        else
+        {
+            // Push transparent pixels
+            for(size_t j = 0; j < frame[i]; j++)
+                rawImage.push_back(Colour(255, 0, 255, false));
+        }
+    }
+}
+   \end{lstlisting}
+   
+   As can be seen above, the blocks use different values, but the basic structure is the same as CEL frames.
    
 \newpage
 
