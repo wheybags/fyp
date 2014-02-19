@@ -112,7 +112,13 @@ struct fileHeader
 	uint32_t endOffset;
 };
 	\end{lstlisting}
-	
+	 This header is common to both CEL and CL2 files.
+	 
+	\subsubsection{Frame Headers}
+	\label{sec:frameheaders}
+	Some CEL frames contain headers at the start of the frame. It is 5 uint16\_t (10 bytes) long. Entries appear to be pointers to positions in the file, which when reached during decoding will leave us with a specific number of lines created, but I only understand the second entry (and it is the only one of use to us). This entry gives us a position in the file, that when we reach it, we will have processed 32 lines of pixels in the image. By checking how many pixels have been genrated by the time we get to that point, we can divide this number by 32 to get the image width.
+	The first entry is always 10, as it points to the start of the image data.
+	The third entry may point to the end of the 64th line (if it exists) and so on, but I have not investigated this as it is of no use to me.
 	
 	\subsubsection{CEL Frames}
 	There are two kinds of plain CEL frame. One is the "normal" kind, which contains animations of objects. Examples of these can be found in the items directory in DIABDAT.MPQ. The other is tileset cel frames. As the name implies, these contain the tilesets for levels. These are found only in levels/*/*.cel.
@@ -168,7 +174,6 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
     }
 }
 	\end{lstlisting}
-	\newpage
 
 \subsubsubsection{Tileset CEL frames}
 	These CEL files have the same format as normal CEL files, but the data in the franes is different. There are a number of possible "types" of frame within tileset CEL files. All of them are always of width and height 32.
@@ -258,6 +263,15 @@ void cl2Decode(const std::vector<uint8_t>& frame,
    
    As can be seen above, the blocks use different values, but the basic structure is the same as CEL frames.
    
+ 	\subsubsection{Frame Width}
+ 	Frame width determination is not as simple as it might sound. None of the frame formats have image dimensions built in, but there are a number of heuristics to find them.
+ 	For images with a frame header, the technique described in section \ref{sec:frameheaders} can be used. 
+ 	For tileset frames, the width is always 32.
+ 	For all others, there is another technique, which will work so long as the image width is not a multiple of 127, on images with no transparency (which headerless images seem to be).
+ 	
+ 	The maximum stretch of a Regular block is 127. A block will never straddle two lines, so if for example a frame were of width 130, there would be a series of 127 blocks followed by 3 blocks, one pair for each line.
+ 	
+ 	We can abuse this fact, by starting at the start of the frame, and adding together each command block until we find one that is not 127. At that point the sum of the previous 127s + the current block is the width of the image, as the current block has to exist to split on a line.
 \newpage
 
 \bibliographystyle{plain}
