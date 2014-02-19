@@ -2,6 +2,8 @@
 
 \usepackage{url}
 \usepackage{listings}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
 
 \newcommand{\subsubsubsection}[1] 
 {
@@ -115,6 +117,7 @@ struct fileHeader
 	\subsubsection{CEL Frames}
 	There are two kinds of plain CEL frame. One is the "normal" kind, which contains animations of objects. Examples of these can be found in the items directory in DIABDAT.MPQ. The other is tileset cel frames. As the name implies, these contain the tilesets for levels. These are found only in levels/*/*.cel.
 	A given CEL file will only conatin one of these types, not both.
+A colour in a CEL frame will always be a single byte index into a palette.
 
 	\subsubsubsection{Normal CEL Frames}
 	Normal Frames are composed of a series of command and data blocks.
@@ -156,7 +159,7 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
         }
 
         // Transparency command
-        else if(128 <= frame[i])
+        else // >= 128
         {
             // Push (256 - command value) transparent pixels
             for(size_t j = 0; j < 256-frame[i]; j++)
@@ -166,7 +169,33 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
 }
 	\end{lstlisting}
 	\newpage
+
+\subsubsubsection{Tileset CEL frames}
+	These CEL files have the same format as normal CEL files, but the data in the franes is different. There are a number of possible "types" of frame within tileset CEL files. All of them are always of width and height 32.
+\begin{itemize}
+
+	\item{Raw:} Raw frames are just that, 32*32=1024 bytes of raw colours, with no transparency. 
 	
+	\item{Normal:} Some frames are normal frames as described in the previous section. These never have headers when contained in tilese CEL files.
+	
+	\item{Greater/Less than frames:} These are the most interesting frame type in cel files. They are the tiny triangles which make up half of an isometric block on the map. The name greater/less than is borrowed from ProjectDDT\cite{ddt}. \\
+\includegraphics{ltgt}\\ Above is an example of a less than and greater than frame respectively. As you can see, when placed together, they make up a 64*32 pixel isometric block.\\
+You can tell if a frame is a less than or greater than frame by looking at the contents. A certain set of bytes will be zeroed in both cases.\\
+Less Than: bytes 0,1,8,9,24,25,48,49,80,81,120,121,168,169,224,225\\
+Greater Than: bytes 2,3,14,15,34,35,62,63,98,99,142,143,194,195\\
+
+	These bytes are clearly in pairs. Each pair marks the end of two rows of colour, as shown in the image below:\\
+\includegraphics[scale=0.3]{ltgt-markers}\\
+The yellow blocks are the bytes in between the markers, which contain colour indices, the red are the markers themselves. When rendereing, these are ignored, so all non-yellow blocks are transparent.
+
+	For a given less/greater than frame, the first half will always conform to the scheme described above, but this only shows half the image.
+	From there, there is variation. Some frames will have another half encoded the same way, with the following markers:\\
+	Less Than Second Half: bytes 288,289,348,349,400,401,444,445,480,481,508,509,528,529\\
+	Greater Than Second Half: bytes 245,255,318,319,374,375,422,423,462,463,494,495,518,519,534,535\\
+	
+	If these markers are not present, however, the second half is raw with no transparency, so we can just pull it out directly, eg:\\
+	\includegraphics[scale=0.5]{rawtop}
+\end{itemize}
    
 \newpage
 
