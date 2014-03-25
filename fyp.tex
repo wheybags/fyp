@@ -63,13 +63,40 @@ random items and dungeons. These will be a focus of the project.
     	The code is also just generally not very readable, and he has a tendency to not create classes where they would have been appropriate.
     	It is however, very useful as a reference, as it is under the GPL.
     	It contains code for loading and interpreting several diablo file formats, which while hard to follow, is still extremely useful.
-    
-    \subsection{Design Choices}
+  	\newpage
+        
+    \section{Design Choices}
     The engine should support python scripting, to allow entension of the engine, and of games created forthe engine.
     File formats used by the game should be simple text formats, like the formats used in Fifengine.
     The engine should be divided into a number of module.
     
-    \newpage
+    \subsection{Architecture}
+    Then architecture of the engine has been based on the OpenMW\cite{openmw} engine, with which I have some experience.
+    The project produces a number of executables (currently the main engine executable, an image viewer, and a test program for the IO library), each having it's own subdirectory in the apps/ folder in the root of the project.
+    
+    Code common to multiple "apps" is placed in the components/ sudirectory in the root of the project, and external libraries that have to be shipped as source along with the engine source are placed in the extern/ folder.
+    
+    \subsection{Renderer}
+    The current rendering library being used is SDL 1.2. However, all SDL specific code has been confined to two files, with all other parts of the code using functions exported by those two files. This is done with the intention of easing the transition of switching to SDL 2 in the future.
+    
+    Rendering code is split into two parts, in different places. There is a rendering "component" in the components/render folder.
+    This component exports basic rendering functions for loading and drawing sprites etc, but does not deal with the rendering loop, it has a draw() function which will swap the buffers, and must be called manually.   
+    It is essentially a wrapper for a low level rendering library, with some application specific logic (it has the ability to draw "levels", ie Level::Level objects representing an isometric level of the game, and also load the proprietary CEL and CL2 formats).
+    This code is placed in a component because it is common to both the freeablo game engine and the image viewer.
+    
+    \mbox{}
+    
+    The second part is the code that controls the actual rendering for the game. This is located in apps/freeablo/farender. Essentially, this contains a class FARender::Renderer, that manages sprite loading and render looping for the game engine.  
+    When created, the Renderer class starts up a seperate thread, which then loops until the object is destroyed. Each iteration, the renderer will draw the level, and a list of objects, which are essentially just sprites and locations.
+    The game engine communicates with the renderer through a triple buffered system.
+    
+    The Renderer creates three RenderState objects, each of which is just a container for a number of sprites and their corresponding locations, and a location on which to centre the camera.
+    Each iteration of the game loop, after processing the game logic for the current tick, the engine will "fill" a render state, and pass it off to the renderer. This filling is basically just a flattening of game state, removing all information about objects other than sprite and location, and dumping it into the state.
+    Three states are used, as at any given point the renderer can be drawing a state, and the game loop can be filling one, so with three we are always guaranteed to have one free.
+    Locks are used when rendering and filling a state to ensure that we are never reading and writing the same state at the same time.
+    As the game and render loops can (and probably are) iterating at different rates, when the render loop is going faster, some render states will never be drawn to screen, but this is ok as whatever is on screen at any given moment is an accurate portrayal of game state to the granularity allowed by the iteration speed of the renderer, which is determined by the speed of your processor and GPU (no framelimit is set on the renderer).
+    
+
     
     \subsection{Libraries}
         \subsubsection{2d graphics libraries}
