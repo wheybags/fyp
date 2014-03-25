@@ -76,6 +76,15 @@ random items and dungeons. These will be a focus of the project.
     
     Code common to multiple "apps" is placed in the components/ sudirectory in the root of the project, and external libraries that have to be shipped as source along with the engine source are placed in the extern/ folder.
     
+    \subsection{Engine Architecture}
+    Code withing the main engine folder is split into components prefixed with FA for freeablo. Again, this convention is borrowed from OpenMW\cite{openmw}.
+    The main important components so far are:
+    \begin{itemize}
+        \item{FAWorld - a container object for the state of the current level. Holds all the objects on the level, and is responsible for updating them (i.e moving them around in response to input etc.)}
+        \item{FALevelGen - responsible for generating random dungeons}
+        \item{FARender - controls rendering to screen}
+    \end{itemize}
+
     \subsection{Renderer}
     The current rendering library being used is SDL 1.2. However, all SDL specific code has been confined to two files, with all other parts of the code using functions exported by those two files. This is done with the intention of easing the transition of switching to SDL 2 in the future.
     
@@ -95,7 +104,10 @@ random items and dungeons. These will be a focus of the project.
     Three states are used, as at any given point the renderer can be drawing a state, and the game loop can be filling one, so with three we are always guaranteed to have one free.
     Locks are used when rendering and filling a state to ensure that we are never reading and writing the same state at the same time.
     As the game and render loops can (and probably are) iterating at different rates, when the render loop is going faster, some render states will never be drawn to screen, but this is ok as whatever is on screen at any given moment is an accurate portrayal of game state to the granularity allowed by the iteration speed of the renderer, which is determined by the speed of your processor and GPU (no framelimit is set on the renderer).
-    
+        
+    \subsection{Input}
+    Input is handled in the main thread. Like rendering, it is done using SDL, so it is also abstarcted away in the Input compnent.
+    The input component consists of an object to which one binds callbacks. These callbacks are then executed when the poll() method is called, if the corresponding input actions have occurred.
 
     
     \subsection{Libraries}
