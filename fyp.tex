@@ -179,6 +179,9 @@ random items and dungeons. These will be a focus of the project.
 \section{File Formats}
 In the following section, I will use stdint.h style names for naming datatypes with exact bit width.
 
+\subsection{PAL files}
+    PAL files are colour pallettes used by the image formats in diablo. They always contain 256 colours, and each colour is 3 bytes long (r, g, and b bytes), so they are always 768 bytes long. Image files refer to them by index into the file (so, a two would represent the 3rd colour, or the third group of three bytes).
+
 \subsection{CEL image files}
 	CEL image files use the CEL and CL2 file extensions. There are some minor differences between the two, but they are fundamentally the same. The basic capabilities of the format are run length encoding, and transparency (but only total transparency, not partial). Each file can contain multiple frames that can represent parts of an object, frames in an animation, or even tilesets for levels.
 
