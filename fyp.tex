@@ -360,6 +360,53 @@ void cl2Decode(const std::vector<uint8_t>& frame,
  	As there is always 8 images in such files, the first pointer will always be 32, as it will always point to the first byte after the headers, which are 8*4=32 bytes long, so it is possible to tell which files are archives by checking the first uint32\_t against 32.
  	
  	For CEL files, that's all there is to it, but for CL2, it's a little more complicated. The archive header on CL2 archives points not to the data, but to the individual file headers (described in section \ref{sec:fileheaders}), which then point to the frames, relative to their own position.
+
+\newpage
+
+\subsection{Level Files}
+    Levels in diablo are stored in a number of files. To begin with, there is the heirarchy of DUN, TIL and MIN files.
+    DUN files are the top level map file, which contain blocks that refer to the corresponding TIL file. Each entry in the TIL file is for tiles on the map, and each of those tiles is defined in the MIN file. The MIN file defines the sprites that make up the tile (total of 16).
+    The properties of each tile is defined in the SOL file.
+
+    \subsubsection{DUN files}
+    DUN files are quite simple. They are essentyially a giant array of int16\_t s. The first two numbers are the width and height of the level (divided by four, as each block in the dun represents four actual level tiles). The remaining numbers are indices into the TIL file for each group of four tiles. Below is a c-style struct representing the structure of a dun file.
+    \begin{lstlisting}
+struct Dun
+{
+    int16_t width;
+    int16_t height;
+    int16_t blocks[width][height];
+};
+\end{lstlisting}
+
+    \subsubsection{TIL files}
+    TIL files are also quite simple. they are just a massive array of int16\_t s, where each group of four is a block that can be referred to by the DUN file.
+
+    \begin{lstlisting}
+struct TilBlock
+{
+    int16_t top;
+    int16_t left;
+    int16_t right;
+    int16_t bottom;
+};
+
+struct Til
+{
+    TilBlock blocks[FILESIZE/4];
+};
+    \end{lstlisting}
+
+    \subsubsection{MIN files}
+    MIN files are slightly awkward in that their size is not set. In l4.min and town.min, each entry is of size 16, but for all others they are 10.
+    MIN files essentially are a list of blocks, recording the cel frame indices used for each. They are each a pillar with two images on each level, allowing a block to have things up above it (eg, a tree). They start at the top and work down, as illustrated in the image below:\\
+    \includegraphics{minpillar}
+    
+    \subsubsection{SOL files}
+    SOL files have not been fully figured out, however they are used becuase we can get some useful information out of them.
+    Each byte in the SOL file is a bit field correcponding to an entry in the MIN file. Currently the only known value is the least signifigant bit, which indicates if a block is "passable" by the player and npcs (ie ground is passable, a wall isn't). A 0 in this position indicates that the block is passable, a 1 that it is not.
+
+
 \newpage
 
 \bibliographystyle{plain}
