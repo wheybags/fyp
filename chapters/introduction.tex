@@ -1,0 +1,22 @@
+\section{Introduction}
+	\subsection{Background and Motivation}
+	Diablo is an isometric hack and slash roguelike game published by Blizzard Entertainment in 1996\cite{diablo}.
+	
+	Hack and slash is a genre of video game, that focuses on combat. Generally, hack and slash games will emphasize   traditional weapons like swords and bows over more moder ones like guns. The name is drawn from teh fact that the player spends most of their time running through dungeons, slaying all in their path.
+	
+	Roguelike games are another genre. The name comes from the game Rogue\cite{rogue}, which spawned the genre.
+	Classic features of roguelike games are the use of a random number generator to create procedurally generated levels, items and enemies, and permanent death (although Diablo does not have this).
+	
+	As it was published in 1996, the game engine that Diablo runs on has become quite outdated. It was only published on windows, so other operating systems have always been inaccessible, but today it can be difficult make it run properly even on modern versions of windows.
+	In adddition to this, the original engine has only two out put resolutions, 640x480, and 800x600, both of which are insufficiently small by todays standards, requiring eiother strecthing or letterboxing to be used on a modern monitor.
+	
+	Another deficiency in the original engine is it's total lack of mod support. Almost all the file formats that were used for the games content were proprietary, with no documentation or tools provided for editing them, and the game logic was completely inaccessible by being locked down into a compiled binary. This however, did not stop the modding community, who managed to reverse engineer much of the game code, and also to decode the proprietary content file formats.
+
+	\subsection{Goals}	
+	The greater aim of this project is to create a modern engine that addresses these issues. Specifically, to create an engine using modern libraries, which is portable across platforms, is friendly to modifications without having to be recompiled, and is released under a permissive license (GPLv3 was chosen for this purpose).
+	The long term aim is to attract contributors from the community to help to build the engine as it is envisioned. For the duration of this final year project however, the goal is set a little lower, as a fuully feature complete engine would simply take too long. The goal therefore, is to create a working base for the engine.
+	
+	To do this, the main tasks are to reverse engineer the main important file formats for levels and images, and impelement a C++ library for decoding them, build a game engine to render these decoded assets as levels and characters, and create the random dungeon generator, which is the hallmark of Diablo, and the roguelike genre.
+	
+	\subsection{Report Roadmap}
+	In the remainder of this report, an attempt shall be made to document the design architecture of the engine  implemented, including the choices that were made, and the reasons for them. The level generation algorithm will be outlined. Finally, the various file formats that were reverse engineered in the course of the project shall be documented as fully as possible, with the intention being to provide enough information that the reader could implement decoders themselves.
