@@ -10,4 +10,4 @@ fyp.aux: fyp.tex
 	pdflatex fyp.tex
 
 clean:
-	rm *.swp *.aux *.bbl *.blg *.log *.pdf *.toc >/dev/null 2>&1
+	rm *.swp *.aux *.bbl *.blg *.log *.pdf *.toc *.synctex* >/dev/null 2>&1
