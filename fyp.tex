@@ -368,7 +368,10 @@ void cl2Decode(const std::vector<uint8_t>& frame,
 
 \subsection{Level Files}
     Levels in diablo are stored in a number of files. To begin with, there is the heirarchy of DUN, TIL and MIN files.
-    DUN files are the top level map file, which contain blocks that refer to the corresponding TIL file. Each entry in the TIL file is for tiles on the map, and each of those tiles is defined in the MIN file. The MIN file defines the sprites that make up the tile (total of 16).
+    DUN files are the top level map file, which contain blocks that refer to the corresponding TIL file. Each entry in the TIL file is for tiles on the map, and each of those tiles is defined in the MIN file. The MIN file defines the sprites that make up the tile (total of 16). This is illustrated in the image below:\\
+    
+    \begin{center}\includegraphics[scale=0.6]{level}\end{center}
+    
     The properties of each tile is defined in the SOL file.
 
     \subsubsection{DUN files}
@@ -380,7 +383,7 @@ struct Dun
     int16_t height;
     int16_t blocks[width][height];
 };
-\end{lstlisting}
+    \end{lstlisting}
 
     \subsubsection{TIL files}
     TIL files are also quite simple. they are just a massive array of int16\_t s, where each group of four is a block that can be referred to by the DUN file.
