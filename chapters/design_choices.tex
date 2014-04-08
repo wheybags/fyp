@@ -1,0 +1,69 @@
+  \section{Design Choices}
+    The engine should support python scripting, to allow entension of the engine, and of games created forthe engine.
+    File formats used by the game should be simple text formats, like the formats used in Fifengine.
+    The engine should be divided into a number of module.
+    
+    \subsection{Architecture}
+    Then architecture of the engine has been based on the OpenMW\cite{openmw} engine, with which I have some experience.
+    The project produces a number of executables (currently the main engine executable, an image viewer, and a test program for the IO library), each having it's own subdirectory in the apps/ folder in the root of the project.
+    
+    Code common to multiple "apps" is placed in the components/ sudirectory in the root of the project, and external libraries that have to be shipped as source along with the engine source are placed in the extern/ folder.
+    
+    \subsection{Engine Architecture}
+    Code withing the main engine folder is split into components prefixed with FA for freeablo. Again, this convention is borrowed from OpenMW\cite{openmw}.
+    The main important components so far are:
+    \begin{itemize}
+        \item{FAWorld - a container object for the state of the current level. Holds all the objects on the level, and is responsible for updating them (i.e moving them around in response to input etc.)}
+        \item{FALevelGen - responsible for generating random dungeons}
+        \item{FARender - controls rendering to screen}
+    \end{itemize}
+
+    \subsection{Renderer}
+    The current rendering library being used is SDL 1.2. However, all SDL specific code has been confined to two files, with all other parts of the code using functions exported by those two files. This is done with the intention of easing the transition of switching to SDL 2 in the future.
+    
+    Rendering code is split into two parts, in different places. There is a rendering "component" in the components/render folder.
+    This component exports basic rendering functions for loading and drawing sprites etc, but does not deal with the rendering loop, it has a draw() function which will swap the buffers, and must be called manually.   
+    It is essentially a wrapper for a low level rendering library, with some application specific logic (it has the ability to draw "levels", ie Level::Level objects representing an isometric level of the game, and also load the proprietary CEL and CL2 formats).
+    This code is placed in a component because it is common to both the freeablo game engine and the image viewer.
+    
+    \mbox{}
+    
+    The second part is the code that controls the actual rendering for the game. This is located in apps/freeablo/farender. Essentially, this contains a class FARender::Renderer, that manages sprite loading and render looping for the game engine.  
+    When created, the Renderer class starts up a seperate thread, which then loops until the object is destroyed. Each iteration, the renderer will draw the level, and a list of objects, which are essentially just sprites and locations.
+    The game engine communicates with the renderer through a triple buffered system.
+    
+    The Renderer creates three RenderState objects, each of which is just a container for a number of sprites and their corresponding locations, and a location on which to centre the camera.
+    Each iteration of the game loop, after processing the game logic for the current tick, the engine will "fill" a render state, and pass it off to the renderer. This filling is basically just a flattening of game state, removing all information about objects other than sprite and location, and dumping it into the state.
+    Three states are used, as at any given point the renderer can be drawing a state, and the game loop can be filling one, so with three we are always guaranteed to have one free.
+    Locks are used when rendering and filling a state to ensure that we are never reading and writing the same state at the same time.
+    As the game and render loops can (and probably are) iterating at different rates, when the render loop is going faster, some render states will never be drawn to screen, but this is ok as whatever is on screen at any given moment is an accurate portrayal of game state to the granularity allowed by the iteration speed of the renderer, which is determined by the speed of your processor and GPU (no framelimit is set on the renderer).
+        
+    \subsection{Input}
+    Input is handled in the main thread. Like rendering, it is done using SDL, so it is also abstarcted away in the Input compnent.
+    The input component consists of an object to which one binds callbacks. These callbacks are then executed when the poll() method is called, if the corresponding input actions have occurred.
+
+    
+    \subsection{Libraries}
+        \subsubsection{2d graphics libraries}
+    	There seems to be 3 different options for 2d graphics in C++:
+    	\begin{itemize}
+    	    \item{SDL}
+    	    \item{Allegro}
+    	    \item{SFML}
+    	\end{itemize}
+    	
+    	Of the above, all are written in plain C, except Allegro, which is C++.
+    	I have decided to use SDL for this project, as I am already familiar with it.
+    	More specifically, I have decided to use SDL 1.
+    	SDL 2 has been released, but is not yet packaged in most distros. 
+    	The intent is to write an SDL backend, which will eventually support either SDL1 or 2.
+    	
+    	\subsubsection{Cross Platform}
+        The Boost C++ library addressess many of the problems with writing portable C++ code today.
+        Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
+        Even with bo	ost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
+        
+        \subsubsection{Audio}
+        SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
+        FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
+        OpenAL seems to be popular also, but is no longer FOSS.

@@ -1,0 +1,23 @@
+\section{Related work}
+    \subsection{Relevant existing FOSS Isometric Engines}
+    	\subsubsection{Flare Isometric Engine}
+    	Flare\cite{flare} is an open source isometric hack and slash game engine. It uses the SDL library for displaying graphics, and simple text based file formats.
+    	It does not appear to have any embedded scripting language.
+    	
+    	\subsubsection{Holyspirit}
+    	Holyspirit\cite{holyspirit} claims to be in alpha. It uses the SFML library. Does not appear to support networking.
+    	Developed in French.
+    	
+    	\subsubsection{Fifengine}
+    	Fifengine\cite{fife} (Flexible Isometric Free Engine) is a FOSS generic isometric game engine.
+    	It supports python scripting, and the UI is skinnable with xml.
+    	It uses SDL and opengl. It does not support networking.
+    	
+    	\subsubsection{ProjectDDT}
+    	ProjectDDT\cite{ddt} is an existing attempt to create a modern FOSS engone for Diablo.
+    	It has been abandoned now since 2011.
+    	I have decided to create my own project, in favour of continuing work on this, because it is extremely badly engineered.
+    	For example: the creator of this work decided not to use header files, but simply placed function declarations at the start of files where he needed them.
+    	The code is also just generally not very readable, and he has a tendency to not create classes where they would have been appropriate.
+    	It is however, very useful as a reference, as it is under the GPL.
+    	It contains code for loading and interpreting several diablo file formats, which while hard to follow, is still extremely useful.

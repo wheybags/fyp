@@ -1,0 +1,38 @@
+\section{Level Generation}
+    Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting alorithms.
+    After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
+
+    \mbox{}
+
+    The level generation algorithm used in freeablo is borrowed from a game called TinyKeep\cite{tinykeep}, the author of which has published the algorithm he developed\cite{tinygen}.
+    The algorithm is designed to create rooms connected by corridoors on a grid.
+    There are a number of steps which are executed in sequence to produce this map.
+    \begin{itemize}
+        \item
+        {
+            The first step is to place a number of rooms in the centre of the grid, keeping them within a small circle placed there.
+            The rooms can overlap within this circle, and indeed are expected to. The number of rooms, and the radius of the circle in which they are placed
+            should be related in some way to the size of the map being generated. The width, height, and position within the circle of the rooms is randomly generated, with the randomness for width and height biased so we receive more small rooms than large ones.    
+        }
+        \item
+        {
+            After this, we use seperation steering to move the rooms away from eachother until none of them overlap.
+        }
+        \item
+        {
+            At this point, we split the rooms into two groups, by thresholding on size. Those over the threshold value (area of 30 was usind in the freeablo engine) are said to be real rooms, and the rest are said to be corridoor rooms. The bias when generating levels mentioned above ensures that most rooms are chosen to be corridoor rooms.
+        }
+        \item
+        {
+            We construct a graph of real rooms, where each rooms is connected to each other room. We then calculate the miniumum spanning tree of this graph. Now we know that if we apply corridoors corresponding to the edges on this graph, each room will be accessible from each other one.
+        }
+        \item
+        {
+            Becuase the graph we constructed above is a tree, there will be no cycles, however a small number of cycles is desirable in a dungeon crawler, so we add in a number of random edges to create some.
+        }
+        \item
+        {
+            For every edge on the graph, we create an l-shaped corridoor on the map, joining the two rooms that correspond to that edges vertices.
+            This is where the corridoor rooms come into effect. For each corridoor room that the corridoors intersect, we add the shape of that room onto the corridoor. In this way, we end up with lumpy corridoors that can resemble large rooms themselves, and do not just look like simple l shapes.
+        }
+    \end{itemize}
