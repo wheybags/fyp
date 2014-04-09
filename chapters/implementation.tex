@@ -1,4 +1,6 @@
-\section{Level Generation}
+\section{Implementation}
+
+\subsection{Level Generation}
     Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting alorithms.
     After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
 
@@ -36,3 +38,30 @@
             This is where the corridoor rooms come into effect. For each corridoor room that the corridoors intersect, we add the shape of that room onto the corridoor. In this way, we end up with lumpy corridoors that can resemble large rooms themselves, and do not just look like simple l shapes.
         }
     \end{itemize}
+    
+   	\newpage
+    
+   	\subsection{Libraries}
+       	\subsubsection{2d graphics libraries}
+    	There seems to be 3 different options for 2d graphics in C++:
+    	\begin{itemize}
+    	    \item{SDL}
+    	    \item{Allegro}
+    	    \item{SFML}
+    	\end{itemize}
+    	
+    	Of the above, all are written in plain C, except Allegro, which is C++.
+    	I have decided to use SDL for this project, as I am already familiar with it.
+    	More specifically, I have decided to use SDL 1.
+    	SDL 2 has been released, but is not yet packaged in most distros. 
+    	The intent is to write an SDL backend, which will eventually support either SDL1 or 2.
+    	
+    	\subsubsection{Cross Platform}
+        The Boost C++ library addressess many of the problems with writing portable C++ code today.
+        Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
+        Even with bo	ost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
+        
+        \subsubsection{Audio}
+        SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
+        FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
+        OpenAL seems to be popular also, but is no longer FOSS.

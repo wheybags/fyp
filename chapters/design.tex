@@ -1,4 +1,4 @@
-  \section{Design Choices}
+  \section{Design}
     The engine should support python scripting, to allow entension of the engine, and of games created forthe engine.
     File formats used by the game should be simple text formats, like the formats used in Fifengine.
     The engine should be divided into a number of module.
@@ -41,29 +41,3 @@
     \subsection{Input}
     Input is handled in the main thread. Like rendering, it is done using SDL, so it is also abstarcted away in the Input compnent.
     The input component consists of an object to which one binds callbacks. These callbacks are then executed when the poll() method is called, if the corresponding input actions have occurred.
-
-    
-    \subsection{Libraries}
-        \subsubsection{2d graphics libraries}
-    	There seems to be 3 different options for 2d graphics in C++:
-    	\begin{itemize}
-    	    \item{SDL}
-    	    \item{Allegro}
-    	    \item{SFML}
-    	\end{itemize}
-    	
-    	Of the above, all are written in plain C, except Allegro, which is C++.
-    	I have decided to use SDL for this project, as I am already familiar with it.
-    	More specifically, I have decided to use SDL 1.
-    	SDL 2 has been released, but is not yet packaged in most distros. 
-    	The intent is to write an SDL backend, which will eventually support either SDL1 or 2.
-    	
-    	\subsubsection{Cross Platform}
-        The Boost C++ library addressess many of the problems with writing portable C++ code today.
-        Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
-        Even with bo	ost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
-        
-        \subsubsection{Audio}
-        SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
-        FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
-        OpenAL seems to be popular also, but is no longer FOSS.
