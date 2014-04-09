@@ -38,7 +38,13 @@
   	For each SDL event generated in the render loop, an event is added onto a concurrent queue. The events on this queue are contaioned in a structure that very much resembles the parts of the SDL\_Event union that we actually use.
   	The game loop then calls processInput, which pops events off the queue, and it is here that the callbacks are executed.
 
-
+\subsection{Game Loop}
+	As explained above, the game loop occurs in a secondary thread. The game loop is essentially a huge while loop  located (for now) in the realmain function in the main.cpp file in apps/freeablo.
+	It executes at a fixed rate of 120 time per second, and is reponsible for applying user inputs and advancing game state. The fixed execution rate is required for the engine to be deterministic.
+	
+	Game state is stored in the FAWorld::World object. This object is essentially a container for all object in the world. A call to World::update() will update the positions and animations of these objects.
+	The World class is also responsible for filling RenderState objects, via the fillRenderState method.
+	
 \subsection{Level Generation}
     Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting alorithms.
     After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
