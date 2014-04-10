@@ -45,6 +45,20 @@
 	Game state is stored in the FAWorld::World object. This object is essentially a container for all object in the world. A call to World::update() will update the positions and animations of these objects.
 	The World class is also responsible for filling RenderState objects, via the fillRenderState method.
 	
+\subsection{Diablo.exe}
+	Unfortunately, some of the information required for the game is hardcoded into the original executable.
+	The exact extent to which this issue will occur has not yet been fully determined, but so far the freeablo engine is extracting monster and npc data.
+	
+	To deal with this, the DiabloExe component was created. In order for this to be version independent, the DiabloExe class uses a number of ini files to specify data locations. First the file is hashed to determine which version we are using, then the corresponding ini file is loaded according to that hash. These ini files contain the addresses of the relevant data within the file, which can then be loaded.
+	
+	By abstracting this process out into a generic loader class, we avoid having all sorts of nasty hex addresses cluttering up the source files where the information is actually needed.
+	
+	Of course, in order to load this information, you first need to know where it is, which can be a nontrivial task in itself. Fortunately, there has been extensive reverse engineering work done on diablo in the past. Much of the information needed has addresses documented on the website for The Dark Mod\cite{dmodhex}. Currently, freeablo only has an ini file for version 1.09 of Diablo, as that is the version documentedin the above location (this is teh second most recent patch for Diablo).
+	
+	However, not all the necessary information is documented there, for example the locations of the NPCs in the tow had to be figured out unassisted. For this, the Hex Rays IDA\cite{hexrays} decompiler proved fantastically useful.
+
+\newpage
+	
 \subsection{Level Generation}
     Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting alorithms.
     After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
