@@ -57,6 +57,14 @@
 	
 	However, not all the necessary information is documented there, for example the locations of the NPCs in the tow had to be figured out unassisted. For this, the Hex Rays IDA\cite{hexrays} decompiler proved fantastically useful.
 
+\subsection{FAIO}
+	The FAIO component is responsible for file IO in freeablo (or, more accurately, just input, as it does not allow file writing).
+	The game data files for Diablo are all stored in the DIABDAT.MPQ file. MPQ is a proprietary archive format originally developed by Blizzard for Diablo, and used in all their games since.
+	
+	Thankfully, a library exists for using these archives, named StormLib\cite{stormlib}. It provides an fopen / fread etc style api for mpq files.
+	FAIO is essentially a wrapper around this library, that allows the user to override files by placing them on the local filesystem. What this means is that when requested to open a file, it will search for the file in the local filesystem, and if it it finds it there, use that, otherwise look in the MPQ file.
+	This behaviour is based on that of the BSA files in the Elder Scrolls game series.
+	
 \newpage
 	
 \subsection{Level Generation}
