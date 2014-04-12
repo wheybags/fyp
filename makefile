@@ -1,13 +1,8 @@
 all: fyp.pdf
 
-fyp.pdf: fyp.bbl
-	pdflatex fyp.tex; pdflatex fyp.tex
-
-fyp.bbl: fyp.aux
-	bibtex fyp.aux
-
-fyp.aux: fyp.tex
-	pdflatex fyp.tex
+fyp.pdf:
+	pdflatex fyp; bibtex fyp; pdflatex fyp; pdflatex fyp
 
 clean:
-	rm *.swp *.aux *.bbl *.blg *.log *.pdf *.toc *.synctex* >/dev/null 2>&1
+	rm *.aux *.bbl *.blg *.log *.pdf *.toc *.synctex* *.nlo *.out Chapters/*.aux
+

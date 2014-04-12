@@ -1,6 +1,6 @@
-\section{Implementation}
+\chapter{Implementation}
 
- \subsection{Rendering}
+ \section{Rendering}
     The current rendering library being used is SDL 1.2. However, all SDL specific code has been confined to two files, with all other parts of the code using functions exported by those two files. This is done with the intention of easing the transition of switching to SDL 2 in the future.
     
     Rendering code is split into two parts, in different places. There is a rendering "component" in the components/render folder.
@@ -30,7 +30,7 @@
     When that function returns, it will assign mThreadCommunticationTmp the pointer to the new heap Sprite, and set mRenderThreadState back to running.
     The game thread will now see that it has completed, and return the sprite as required.
         
-    \subsection{Input}
+    \section{Input}
     Input is handled in the game loop thread, with the Input::InputManager singleton class. Like rendering, it is done using SDL, so it is also abstracted away in the Input compnent.
     The input component consists of an object to which one binds callbacks. These callbacks are then executed when the processInput() method is called, if the corresponding input actions have occurred.
   	
@@ -38,14 +38,14 @@
   	For each SDL event generated in the render loop, an event is added onto a concurrent queue. The events on this queue are contaioned in a structure that very much resembles the parts of the SDL\_Event union that we actually use.
   	The game loop then calls processInput, which pops events off the queue, and it is here that the callbacks are executed.
 
-\subsection{Game Loop}
+\section{Game Loop}
 	As explained above, the game loop occurs in a secondary thread. The game loop is essentially a huge while loop  located (for now) in the realmain function in the main.cpp file in apps/freeablo.
 	It executes at a fixed rate of 120 time per second, and is reponsible for applying user inputs and advancing game state. The fixed execution rate is required for the engine to be deterministic.
 	
 	Game state is stored in the FAWorld::World object. This object is essentially a container for all object in the world. A call to World::update() will update the positions and animations of these objects.
 	The World class is also responsible for filling RenderState objects, via the fillRenderState method.
 	
-\subsection{Diablo.exe}
+\section{Diablo.exe}
 	Unfortunately, some of the information required for the game is hardcoded into the original executable.
 	The exact extent to which this issue will occur has not yet been fully determined, but so far the freeablo engine is extracting monster and npc data.
 	
@@ -57,7 +57,7 @@
 	
 	However, not all the necessary information is documented there, for example the locations of the NPCs in the tow had to be figured out unassisted. For this, the Hex Rays IDA\cite{hexrays} decompiler proved fantastically useful.
 
-\subsection{FAIO}
+\section{FAIO}
 	The FAIO component is responsible for file IO in freeablo (or, more accurately, just input, as it does not allow file writing).
 	The game data files for Diablo are all stored in the DIABDAT.MPQ file. MPQ is a proprietary archive format originally developed by Blizzard for Diablo, and used in all their games since.
 	
@@ -67,7 +67,7 @@
 	
 \newpage
 	
-\subsection{Level Generation}
+\section{Level Generation}
     Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting alorithms.
     After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
 
@@ -108,8 +108,8 @@
     
    	\newpage
     
-   	\subsection{Libraries}
-       	\subsubsection{2d graphics libraries}
+   	\section{Libraries}
+       	\subsection{2d graphics libraries}
     	There seems to be 3 different options for 2d graphics in C++:
     	\begin{itemize}
     	    \item{SDL}
@@ -123,12 +123,12 @@
     	SDL 2 has been released, but is not yet packaged in most distros. 
     	The intent is to write an SDL backend, which will eventually support either SDL1 or 2.
     	
-    	\subsubsection{Cross Platform}
+    	\subsection{Cross Platform}
         The Boost C++ library addressess many of the problems with writing portable C++ code today.
         Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
         Even with bo	ost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
         
-        \subsubsection{Audio}
+        \subsection{Audio}
         SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
         FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
         OpenAL seems to be popular also, but is no longer FOSS.

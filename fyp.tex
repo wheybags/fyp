@@ -1,63 +1,64 @@
-\documentclass[a4paper]{article}
+\include{preamble}
 
-\usepackage{url}
-\usepackage{listings}
-\usepackage{graphicx}
-\graphicspath{ {images/} }
-
-\newcommand{\subsubsubsection}[1] 
-{
-	\paragraph{#1}
-	\mbox{}\\
-	
-	\noindent
-}
-
-\setcounter{secnumdepth}{5}	
-\setcounter{tocdepth}{5}
-
-\lstloadlanguages{C++}
-\lstset{language=C++, breaklines=true}
-
-
-\title{Isometric Hack and Slash Game Engine}
-\author{Tom Mason - 10329877\\Supervisor: Mads Haahr}
-
+% Uncomment this if you want to print DRAFT in big letters on each page
+%\usepackage{draftwatermark}
 \begin{document}
-\maketitle
 
-\begin{abstract}
-The purpose of the project is to create a modern open source reimplementation of the engine used in the 1996 video game Diablo.\\
-It will use the original data files, so as to avoid issues with copyright, but will also
-support modern file formats, and be a generic engine for games of that style.\\
-The original game is an isometric top down hack and slash game, which features some roguelike elements, such as
-random items and dungeons. These will be a focus of the project.
-\end{abstract}
+% Inserts the 'TRINITY COLLEGE' etc. page
+\inserttitlepage
 
-\newpage
+%%%%%%%%%%%%%% Front matter %%%%%%%%%%%%%%
+
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\declaration
+
+\permissiontolend
+
+\insertabstract
+
+% Need to fiddle with page numbers manually to make them consistent
+\setcounter{page}{4}
+\acknowledgements
 
 \tableofcontents
-\newpage
 
-\input{./chapters/introduction.tex}
+% Uncomment these if you need them
+%\listoffigures
 
-\input{./chapters/related_work.tex}	
-\newpage
-       
-\input{./chapters/design.tex}
-\newpage
-	
-\input{./chapters/implementation.tex}
-\newpage
+%\listoftables
 
-\input{./chapters/file_formats.tex}
+%\lstlistoflistings
 
-\input{./chapters/evaluation.tex}
+%\listofalgorithms
+
+%\printnomenclature
+
+
+%%%%%%%%%%%%%%%%%% Body %%%%%%%%%%%%%%%%%%
 
 \newpage
-\bibliographystyle{plain}
-\bibliography{references}
 
+\pagenumbering{arabic}
+\setcounter{page}{1}
 
+% Write each chapter into a file in the Chapters folder
+% include them with \insertchapter{filename}, e.g.
+% for 'Chapters/introduction.tex', you'd write
+
+\insertchapter{introduction}
+\insertchapter{related_work}
+\insertchapter{design}
+\insertchapter{implementation}
+\insertchapter{file_formats}
+\insertchapter{evaluation}
+
+%%%%%%%%%%%%%% Back matter %%%%%%%%%%%%%%%
+
+\insertbibliography
+
+\appendix
+%\insertchapter{appendix1.tex}
 
 \end{document}

@@ -1,13 +1,13 @@
-\section{File Formats}
+\chapter{File Formats}
 In the following section, I will use stdint.h style names for naming datatypes with exact bit width.
 
-\subsection{PAL files}
+\section{PAL files}
     PAL files are colour pallettes used by the image formats in diablo. They always contain 256 colours, and each colour is 3 bytes long (r, g, and b bytes), so they are always 768 bytes long. Image files refer to them by index into the file (so, a two would represent the 3rd colour, or the third group of three bytes).
 
-\subsection{CEL image files}
+\section{CEL image files}
 	CEL image files use the CEL and CL2 file extensions. There are some minor differences between the two, but they are fundamentally the same. The basic capabilities of the format are run length encoding, and transparency (but only total transparency, not partial). Each file can contain multiple frames that can represent parts of an object, frames in an animation, or even tilesets for levels.
 
-	\subsubsection{File Header}
+	\subsection{File Header}
 	\label{sec:fileheaders}
 	The file header is composed of a series of uint32\_t. The first is the number of frames. This is followed by an offset from the start of the file for each frame, and finally, an offset to the end of the file. Illustrated below is a pseudo-C struct representing it's structure.
 	\begin{lstlisting}
@@ -20,18 +20,18 @@ struct fileHeader
 	\end{lstlisting}
 	 This header is common to both CEL and CL2 files.
 	 
-	\subsubsection{Frame Headers}
+	\subsection{Frame Headers}
 	\label{sec:frameheaders}
 	Some CEL frames contain headers at the start of the frame. It is 5 uint16\_t (10 bytes) long. Entries appear to be pointers to positions in the file, which when reached during decoding will leave us with a specific number of lines created, but I only understand the second entry (and it is the only one of use to us). This entry gives us a position in the file, that when we reach it, we will have processed 32 lines of pixels in the image. By checking how many pixels have been genrated by the time we get to that point, we can divide this number by 32 to get the image width.
 	The first entry is always 10, as it points to the start of the image data.
 	The third entry may point to the end of the 64th line (if it exists) and so on, but I have not investigated this as it is of no use to me.
 	
-	\subsubsection{CEL Frames}
+	\subsection{CEL Frames}
 	There are two kinds of plain CEL frame. One is the "normal" kind, which contains animations of objects. Examples of these can be found in the items directory in DIABDAT.MPQ. The other is tileset cel frames. As the name implies, these contain the tilesets for levels. These are found only in levels/*/*.cel.
 	A given CEL file will only conatin one of these types, not both.
 A colour in a CEL frame will always be a single byte index into a palette.
 
-	\subsubsubsection{Normal CEL Frames}
+	\subsubsection{Normal CEL Frames}
 	Normal Frames are composed of a series of command and data blocks.
 	Each block is a uint8\_t.
 	The command blocks contain instructions about what to do next during decoding. The data blocks contain indices into a palette to obtain a colour value.
@@ -81,7 +81,7 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
 }
 	\end{lstlisting}
 
-\subsubsubsection{Tileset CEL frames}
+\subsubsection{Tileset CEL frames}
 	These CEL files have the same format as normal CEL files, but the data in the franes is different. There are a number of possible "types" of frame within tileset CEL files. All of them are always of width and height 32.
 \begin{itemize}
 
@@ -110,7 +110,7 @@ The yellow blocks are the bytes in between the markers, which contain colour ind
 
 \newpage
 
-\subsubsection{CL2 Frames}
+\subsection{CL2 Frames}
 	CL2 Frames are very similar to CEL frames, with the main difference that the use run-length encoding for colours as well as tranparency. They also always have frame headers.
    In addition to the regular and transparency blocks used in normal CEL frames, they also have RLE blocks, which indicate the number of times to repeat the colour indicated by the next block.
    Below is some C++ code that illustrates this:
@@ -169,7 +169,7 @@ void cl2Decode(const std::vector<uint8_t>& frame,
    
    As can be seen above, the blocks use different values, but the basic structure is the same as CEL frames.
    
- 	\subsubsection{Frame Width}
+ 	\subsection{Frame Width}
  	Frame width determination is not as simple as it might sound. None of the frame formats have image dimensions built in, but there are a number of heuristics to find them.
  	For images with a frame header, the technique described in section \ref{sec:frameheaders} can be used. 
  	For tileset frames, the width is always 32.
@@ -179,7 +179,7 @@ void cl2Decode(const std::vector<uint8_t>& frame,
  	
  	We can abuse this fact, by starting at the start of the frame, and adding together each command block until we find one that is not 127. At that point the sum of the previous 127s + the current block is the width of the image, as the current block has to exist to split on a line.
  	
- 	\subsubsection{CEL Archives}
+ 	\subsection{CEL Archives}
  	Some CEL and CL2 files are in fact archives of multiple CEL/CL2 files, respectively. These are used to store multiple rotations of an animation (eg walk animation in all 8 possible directions). These files have headers at the start, which consist of a number of uint32\_t s, each one pointing to a file contained in the archive.
  	
  	As there is always 8 images in such files, the first pointer will always be 32, as it will always point to the first byte after the headers, which are 8*4=32 bytes long, so it is possible to tell which files are archives by checking the first uint32\_t against 32.
@@ -188,7 +188,7 @@ void cl2Decode(const std::vector<uint8_t>& frame,
 
 \newpage
 
-\subsection{Level Files}
+\section{Level Files}
     Levels in diablo are stored in a number of files. To begin with, there is the heirarchy of DUN, TIL and MIN files.
     DUN files are the top level map file, which contain blocks that refer to the corresponding TIL file. Each entry in the TIL file is for tiles on the map, and each of those tiles is defined in the MIN file. The MIN file defines the sprites that make up the tile (total of 16). This is illustrated in the image below:\\
     
@@ -196,7 +196,7 @@ void cl2Decode(const std::vector<uint8_t>& frame,
     
     The properties of each tile is defined in the SOL file.
 
-    \subsubsection{DUN files}
+    \subsection{DUN files}
     DUN files are quite simple. They are essentyially a giant array of int16\_t s. The first two numbers are the width and height of the level (divided by four, as each block in the dun represents four actual level tiles). The remaining numbers are indices into the TIL file for each group of four tiles. Below is a c-style struct representing the structure of a dun file.
     \begin{lstlisting}
 struct Dun
@@ -207,7 +207,7 @@ struct Dun
 };
     \end{lstlisting}
 
-    \subsubsection{TIL files}
+    \subsection{TIL files}
     TIL files are also quite simple. they are just a massive array of int16\_t s, where each group of four is a block that can be referred to by the DUN file.
 
     \begin{lstlisting}
@@ -225,11 +225,11 @@ struct Til
 };
     \end{lstlisting}
 
-    \subsubsection{MIN files}
+    \subsection{MIN files}
     MIN files are slightly awkward in that their size is not set. In l4.min and town.min, each entry is of size 16, but for all others they are 10.
     MIN files essentially are a list of blocks, recording the cel frame indices used for each. They are each a pillar with two images on each level, allowing a block to have things up above it (eg, a tree). They start at the top and work down, as illustrated in the image below:\\
     \includegraphics{minpillar}
     
-    \subsubsection{SOL files}
+    \subsection{SOL files}
     SOL files have not been fully figured out, however they are used becuase we can get some useful information out of them.
     Each byte in the SOL file is a bit field correcponding to an entry in the MIN file. Currently the only known value is the least signifigant bit, which indicates if a block is "passable" by the player and npcs (ie ground is passable, a wall isn't). A 0 in this position indicates that the block is passable, a 1 that it is not.

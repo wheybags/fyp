@@ -1,0 +1,67 @@
+\documentclass[a4paper, onesided, 12pt]{report}
+
+% set the margins here, if they need to be modified
+\usepackage[a4paper, left=1.3in, right=1.0in]{geometry}
+
+% The linespacing you want
+\linespread{1.4}
+
+% Packages I used for my write-up; you may not need all of them
+
+\usepackage{tikz}
+
+% Makes page numbers, TOC and citations clickable
+\usepackage[colorlinks]{hyperref}
+\usepackage{hyperref}
+
+% Used to make the captions on figures sans serif
+\usepackage{caption}
+
+% For including images
+\usepackage{graphicx}
+\graphicspath{{Graphics/}}
+
+% For fancy code listings
+\usepackage{listings}
+
+% For APA-style citations
+\usepackage{natbib}
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\bibliographystyle{plain}
+
+% Settings for how you want your code listings to look
+\lstset{
+language=C++,
+basicstyle=\ttfamily\scriptsize,
+keywordstyle=\ttfamily,
+numberstyle=\rmfamily\tiny,
+numbers=left,
+commentstyle=\sffamily,
+breaklines=true,
+frame=single,
+stringstyle=\ttfamily,
+identifierstyle=\bfseries,
+lineskip=1mm
+}
+
+\input{constants}
+\input{commands}
+
+% For changing the names of the List of Listings, etc.
+\renewcommand*{\lstlistlistingname}{List of Listings}
+\renewcommand*{\contentsname}{Table of Contents}
+
+% Make the captions sans serif
+\renewcommand{\captionfont}{\sffamily}
+
+
+\setcounter{secnumdepth}{5} 
+\setcounter{tocdepth}{5}
