@@ -1,12 +1,12 @@
 \chapter{Implementation}
 
- \section{Rendering}
-    The current rendering library being used is SDL 1.2. However, all SDL specific code has been confined to two files, with all other parts of the code using functions exported by those two files. This is done with the intention of easing the transition of switching to SDL 2 in the future.
-    
+ \section{Rendering}  
     Rendering code is split into two parts, in different places. There is a rendering "component" in the components/render folder.
     This component exports basic rendering functions for loading and drawing sprites etc, but does not deal with the rendering loop, it has a draw() function which will swap the buffers, and must be called manually.   
     It is essentially a wrapper for a low level rendering library, with some application specific logic (it has the ability to draw "levels", ie Level::Level objects representing an isometric level of the game, and also load the proprietary CEL and CL2 formats).
     This code is placed in a component because it is common to both the freeablo game engine and the image viewer.
+    
+    The rendering component can be backed by either SDL1 or 2, and this can be set at compile time using the USE\_SDL2 cmake variable. SDL2 provides better support for hardware acceleration, and as a result, normally produces much higher framerates. SDL1 was retained as most linux distributions ship SDL2 yet, and also some older platforms are no longer supported in SDL2.
     
     \mbox{}
     
@@ -119,16 +119,18 @@
     	
     	Of the above, all are written in plain C, except Allegro, which is C++.
     	I have decided to use SDL for this project, as I am already familiar with it.
-    	More specifically, I have decided to use SDL 1.
-    	SDL 2 has been released, but is not yet packaged in most distros. 
-    	The intent is to write an SDL backend, which will eventually support either SDL1 or 2.
+    	As described above, both SDL 1 and 2 were used, with the version being configurable at compile time through a cmake vraible.
     	
     	\subsection{Cross Platform}
         The Boost C++ library addressess many of the problems with writing portable C++ code today.
-        Specifically, I intend to make use of the boost::filesystem and boost::threads modules to provide platform-agnostic access to threads and files.
-        Even with bo	ost::filesystem, I shall have to take care to use case insensitive file loading, as the original game was written for windows, so filename cases may not be consistent.
+     	Heavy use has been made of various parts of boost, mostly boost::thread and boost::filesystem.
         
         \subsection{Audio}
         SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
-        FFMPEG's library, libavcodec\cite{libavcodec} supports a lrge number of formats.
+        FFMPEG's library, libavcodec\cite{libavcodec} supports a large number of formats.
         OpenAL seems to be popular also, but is no longer FOSS.
+        Audio has not yet been implemented, but when it is I would lean towards FFMPEG, as it can also be used to decode the intro videoes.
+        
+        \subsection{StormLib}
+        StormLib\cite{stormlib} is a library for accessing files in Blizzard MPQ fromat archives.
+        It was chosen as it is the only real option, others do exist, but are no longer maintained.
