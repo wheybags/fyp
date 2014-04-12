@@ -37,20 +37,26 @@
 
 \bibliographystyle{plain}
 
+\definecolor{kwyellow}{rgb}{0.75,0.75,0}
+
 % Settings for how you want your code listings to look
 \lstset{
 language=C++,
 basicstyle=\ttfamily\scriptsize,
-keywordstyle=\ttfamily,
+keywordstyle=\color{kwyellow}\ttfamily,
+emph={size_t,int,double,float,uint8_t,int16_t,uint32_t},
+emphstyle={\color{blue}},
 numberstyle=\rmfamily\tiny,
 numbers=left,
-commentstyle=\sffamily,
+commentstyle=\color{cyan}\sffamily,
 breaklines=true,
 frame=single,
 stringstyle=\ttfamily,
 identifierstyle=\bfseries,
 lineskip=1mm
 }
+
+
 
 \input{constants}
 \input{commands}
