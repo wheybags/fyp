@@ -11,7 +11,7 @@
     \mbox{}
     
     The second part is the code that controls the actual rendering for the game. This is located in apps/freeablo/farender. Essentially, this contains a class FARender::Renderer, that manages sprite loading and render looping for the game engine.  
-    When created, the Renderer class starts up a seperate thread, which then loops until the object is destroyed. Each iteration, the renderer will draw the level, and a list of objects, which are essentially just sprites and locations.
+    When created, the Renderer class starts up a separate thread, which then loops until the object is destroyed. Each iteration, the renderer will draw the level, and a list of objects, which are essentially just sprites and locations.
     The game engine communicates with the renderer through a triple buffered system.
     
     The Renderer creates three RenderState objects, each of which is just a container for a number of sprites and their corresponding locations, and a location on which to centre the camera.
@@ -22,8 +22,8 @@
     
     \mbox{}
     
-    It is a requirement of the library that all SDL calls occur in the main thread, so there are some synchronisation issues with various actions such as loading sprites and changing level. The restriction taht it be the main thread is the reason that rendering takes place in the main thread, with the game loop occurring in a seperate one, which at first seems counterintuitive.
-    Each action that must take place in the render thread, but is called from the game thread is given an entry in the RenderThreadState enum. The Renderer class has a member, mRenderThreadState, which is an atomic instance of the RenderThreadState enum type (atomicity achieved using boost::atomic). On each iteration of the render loop, the value of thsi synchronisation variable is checked. when it is set to running, the game can render the frame, otherwise, it executes the action corresponding to the current value, then resets itself to allow the render to continue, and the caller to know that it has completed execution. Passing values between threads is done via a void* member called mThreadCommunticationTmp.
+    It is a requirement of the library that all SDL calls occur in the main thread, so there are some synchronisation issues with various actions such as loading sprites and changing level. The restriction that it be the main thread is the reason that rendering takes place in the main thread, with the game loop occurring in a separate one, which at first seems counterintuitive.
+    Each action that must take place in the render thread, but is called from the game thread is given an entry in the RenderThreadState enum. The Renderer class has a member, mRenderThreadState, which is an atomic instance of the RenderThreadState enum type (atomicity achieved using boost::atomic). On each iteration of the render loop, the value of this synchronisation variable is checked. When it is set to running, the game can render the frame, otherwise, it executes the action corresponding to the current value, then resets itself to allow the render to continue, and the caller to know that it has completed execution. Passing values between threads is done via a void* member called mThreadCommunticationTmp.
     
     For example, when loading an sprite, the loadImage function (which is called from the game thread) will save the image path into the void* then set mRenderThreadState to loadSprite, and enter a busy wait for mRenderThreadState == 0.
     When the render thread encounters mRenderThreadState == loadSprite, it will create a new Sprite object on the heap. It will then pull the path out from  the void*, then call loadImageImp with that as the parameter (the function that implements the actual image loading), saving the result into the heap variable it just created.
@@ -31,16 +31,16 @@
     The game thread will now see that it has completed, and return the sprite as required.
         
     \section{Input}
-    Input is handled in the game loop thread, with the Input::InputManager singleton class. Like rendering, it is done using SDL, so it is also abstracted away in the Input compnent.
+    Input is handled in the game loop thread, with the Input::InputManager singleton class. Like rendering, it is done using SDL, so it is also abstracted away in the Input component.
     The input component consists of an object to which one binds callbacks. These callbacks are then executed when the processInput() method is called, if the corresponding input actions have occurred.
   	
   	Unfortunately, while the input is used in the game loop thread, the specifics of SDL require that the SDL event polling occur on the main thread. As such, the raw input polling is done inside the render loop, by calling poll(). 
-  	For each SDL event generated in the render loop, an event is added onto a concurrent queue. The events on this queue are contaioned in a structure that very much resembles the parts of the SDL\_Event union that we actually use.
+  	For each SDL event generated in the render loop, an event is added onto a concurrent queue. The events on this queue are contained in a structure that very much resembles the parts of the SDL\_Event union that we actually use.
   	The game loop then calls processInput, which pops events off the queue, and it is here that the callbacks are executed.
 
 \section{Game Loop}
 	As explained above, the game loop occurs in a secondary thread. The game loop is essentially a huge while loop  located (for now) in the realmain function in the main.cpp file in apps/freeablo.
-	It executes at a fixed rate of 120 time per second, and is reponsible for applying user inputs and advancing game state. The fixed execution rate is required for the engine to be deterministic.
+	It executes at a fixed rate of 120 time per second, and is responsible for applying user inputs and advancing game state. The fixed execution rate is required for the engine to be deterministic.
 	
 	Game state is stored in the FAWorld::World object. This object is essentially a container for all object in the world. A call to World::update() will update the positions and animations of these objects.
 	The World class is also responsible for filling RenderState objects, via the fillRenderState method.
@@ -53,7 +53,7 @@
 	
 	By abstracting this process out into a generic loader class, we avoid having all sorts of nasty hex addresses cluttering up the source files where the information is actually needed.
 	
-	Of course, in order to load this information, you first need to know where it is, which can be a nontrivial task in itself. Fortunately, there has been extensive reverse engineering work done on diablo in the past. Much of the information needed has addresses documented on the website for The Dark Mod\cite{dmodhex}. Currently, freeablo only has an ini file for version 1.09 of Diablo, as that is the version documentedin the above location (this is teh second most recent patch for Diablo).
+	Of course, in order to load this information, you first need to know where it is, which can be a nontrivial task in itself. Fortunately, there has been extensive reverse engineering work done on diablo in the past. Much of the information needed has addresses documented on the website for The Dark Mod\cite{dmodhex}. Currently, freeablo only has an ini file for version 1.09 of Diablo, as that is the version documented in the above location (this is the second most recent patch for Diablo).
 	
 	However, not all the necessary information is documented there, for example the locations of the NPCs in the tow had to be figured out unassisted. For this, the Hex Rays IDA\cite{hexrays} decompiler proved fantastically useful.
 
@@ -68,13 +68,13 @@
 \newpage
 	
 \section{Level Generation}
-    Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting alorithms.
+    Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting algorithms.
     After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
 
     \mbox{}
 
     The level generation algorithm used in freeablo is borrowed from a game called TinyKeep\cite{tinykeep}, the author of which has published the algorithm he developed\cite{tinygen}.
-    The algorithm is designed to create rooms connected by corridoors on a grid.
+    The algorithm is designed to create rooms connected by corridors on a grid.
     There are a number of steps which are executed in sequence to produce this map.
     \begin{itemize}
         \item
@@ -85,24 +85,24 @@
         }
         \item
         {
-            After this, we use seperation steering to move the rooms away from eachother until none of them overlap.
+            After this, we use separation steering to move the rooms away from each other until none of them overlap.
         }
         \item
         {
-            At this point, we split the rooms into two groups, by thresholding on size. Those over the threshold value (area of 30 was usind in the freeablo engine) are said to be real rooms, and the rest are said to be corridoor rooms. The bias when generating levels mentioned above ensures that most rooms are chosen to be corridoor rooms.
+            At this point, we split the rooms into two groups, by thresholding on size. Those over the threshold value (area of 30 was used in the freeablo engine) are said to be real rooms, and the rest are said to be corridor rooms. The bias when generating levels mentioned above ensures that most rooms are chosen to be corridor rooms.
         }
         \item
         {
-            We construct a graph of real rooms, where each rooms is connected to each other room. We then calculate the miniumum spanning tree of this graph. Now we know that if we apply corridoors corresponding to the edges on this graph, each room will be accessible from each other one.
+            We construct a graph of real rooms, where each rooms is connected to each other room. We then calculate the minimum spanning tree of this graph. Now we know that if we apply corridors corresponding to the edges on this graph, each room will be accessible from each other one.
         }
         \item
         {
-            Becuase the graph we constructed above is a tree, there will be no cycles, however a small number of cycles is desirable in a dungeon crawler, so we add in a number of random edges to create some.
+            Because the graph we constructed above is a tree, there will be no cycles, however a small number of cycles is desirable in a dungeon crawler, so we add in a number of random edges to create some.
         }
         \item
         {
-            For every edge on the graph, we create an l-shaped corridoor on the map, joining the two rooms that correspond to that edges vertices.
-            This is where the corridoor rooms come into effect. For each corridoor room that the corridoors intersect, we add the shape of that room onto the corridoor. In this way, we end up with lumpy corridoors that can resemble large rooms themselves, and do not just look like simple l shapes.
+            For every edge on the graph, we create an l-shaped corridor on the map, joining the two rooms that correspond to that edges vertices.
+            This is where the corridor rooms come into effect. For each corridor room that the corridors intersect, we add the shape of that room onto the corridor. In this way, we end up with lumpy corridors that can resemble large rooms themselves, and do not just look like simple l shapes.
         }
     \end{itemize}
     
@@ -119,18 +119,18 @@
     	
     	Of the above, all are written in plain C, except Allegro, which is C++.
     	I have decided to use SDL for this project, as I am already familiar with it.
-    	As described above, both SDL 1 and 2 were used, with the version being configurable at compile time through a cmake vraible.
+    	As described above, both SDL 1 and 2 were used, with the version being configurable at compile time through a cmake varaible.
     	
     	\subsection{Cross Platform}
-        The Boost C++ library addressess many of the problems with writing portable C++ code today.
+        The Boost C++ library addresses many of the problems with writing portable C++ code today.
      	Heavy use has been made of various parts of boost, mostly boost::thread and boost::filesystem.
         
         \subsection{Audio}
         SDL has a module for audio, SDL\_sound\cite{sdls}, but it has not been updated since 2008.
         FFMPEG's library, libavcodec\cite{libavcodec} supports a large number of formats.
         OpenAL seems to be popular also, but is no longer FOSS.
-        Audio has not yet been implemented, but when it is I would lean towards FFMPEG, as it can also be used to decode the intro videoes.
+        Audio has not yet been implemented, but when it is I would lean towards FFMPEG, as it can also be used to decode the intro videos.
         
         \subsection{StormLib}
-        StormLib\cite{stormlib} is a library for accessing files in Blizzard MPQ fromat archives.
+        StormLib\cite{stormlib} is a library for accessing files in Blizzard MPQ format archives.
         It was chosen as it is the only real option, others do exist, but are no longer maintained.
