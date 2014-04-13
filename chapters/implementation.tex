@@ -6,7 +6,7 @@
     It is essentially a wrapper for a low level rendering library, with some application specific logic (it has the ability to draw "levels", ie Level::Level objects representing an isometric level of the game, and also load the proprietary CEL and CL2 formats).
     This code is placed in a component because it is common to both the freeablo game engine and the image viewer.
     
-    The rendering component can be backed by either SDL1 or 2, and this can be set at compile time using the USE\_SDL2 cmake variable. SDL2 provides better support for hardware acceleration, and as a result, normally produces much higher framerates. SDL1 was retained as most linux distributions ship SDL2 yet, and also some older platforms are no longer supported in SDL2.
+    The rendering component can be backed by either SDL1 or 2, and this can be set at compile time using the USE\_SDL2 cmake variable. SDL2 provides better support for hardware acceleration, and as a result, normally produces much higher framerates. SDL1 was retained as most linux distributions don't ship SDL2 yet, and also some older platforms are no longer supported in SDL2.
     
     \mbox{}
     
@@ -25,7 +25,7 @@
     It is a requirement of the library that all SDL calls occur in the main thread, so there are some synchronisation issues with various actions such as loading sprites and changing level. The restriction that it be the main thread is the reason that rendering takes place in the main thread, with the game loop occurring in a separate one, which at first seems counterintuitive.
     Each action that must take place in the render thread, but is called from the game thread is given an entry in the RenderThreadState enum. The Renderer class has a member, mRenderThreadState, which is an atomic instance of the RenderThreadState enum type (atomicity achieved using boost::atomic). On each iteration of the render loop, the value of this synchronisation variable is checked. When it is set to running, the game can render the frame, otherwise, it executes the action corresponding to the current value, then resets itself to allow the render to continue, and the caller to know that it has completed execution. Passing values between threads is done via a void* member called mThreadCommunticationTmp.
     
-    For example, when loading an sprite, the loadImage function (which is called from the game thread) will save the image path into the void* then set mRenderThreadState to loadSprite, and enter a busy wait for mRenderThreadState == 0.
+    For example, when loading a sprite, the loadImage function (which is called from the game thread) will save the image path into the void* then set mRenderThreadState to loadSprite, and enter a busy wait for mRenderThreadState == 0.
     When the render thread encounters mRenderThreadState == loadSprite, it will create a new Sprite object on the heap. It will then pull the path out from  the void*, then call loadImageImp with that as the parameter (the function that implements the actual image loading), saving the result into the heap variable it just created.
     When that function returns, it will assign mThreadCommunticationTmp the pointer to the new heap Sprite, and set mRenderThreadState back to running.
     The game thread will now see that it has completed, and return the sprite as required.
