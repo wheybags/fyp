@@ -1,11 +1,11 @@
   \chapter{Design}
     The engine should support python scripting, to allow extension of the engine, and of games created for the engine.
     File formats used by the game should be simple text formats, like the formats used in Fifengine.
-    The engine should be divided into a number of module.
+    The engine should be divided into a number of modules.
     
     \section{Architecture}
     The architecture of the engine has been based on the OpenMW\cite{openmw} engine, with which I have some experience.
-    The project produces a number of executables (currently the main engine executable, an image viewer, and a test program for the IO library), each having it's own subdirectory in the apps/ folder in the root of the project.
+    The project produces a number of executables (currently the main engine executable, an image viewer, and a test program for the IO library), each having its own subdirectory in the apps/ folder in the root of the project.
     
     Code common to multiple "apps" is placed in the components/ subdirectory in the root of the project, and external libraries that have to be shipped as source along with the engine source are placed in the extern/ folder.
     

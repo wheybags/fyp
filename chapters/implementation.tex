@@ -18,7 +18,7 @@
     Each iteration of the game loop, after processing the game logic for the current tick, the engine will "fill" a render state, and pass it off to the renderer. This filling is basically just a flattening of game state, removing all information about objects other than sprite and location, and dumping it into the state.
     Three states are used, as at any given point the renderer can be drawing a state, and the game loop can be filling one, so with three we are always guaranteed to have one free.
     Locks are used when rendering and filling a state to ensure that we are never reading and writing the same state at the same time.
-    As the game and render loops can (and probably are) iterating at different rates, when the render loop is going faster, some render states will never be drawn to screen, but this is ok as whatever is on screen at any given moment is an accurate portrayal of game state to the granularity allowed by the iteration speed of the renderer, which is determined by the speed of your processor and GPU (no framelimit is set on the renderer).
+    As the game and render loops can (and probably are) iterating at different rates, when the render loop is going faster, some render states will never be drawn to screen, but this is acceptable, as whatever is on screen at any given moment is an accurate portrayal of game state to the granularity allowed by the iteration speed of the renderer, which is determined by the speed of the processor and GPU (no framelimit is set on the renderer).
     
     \mbox{}
     
@@ -49,27 +49,27 @@
 	Unfortunately, some of the information required for the game is hardcoded into the original executable.
 	The exact extent to which this issue will occur has not yet been fully determined, but so far the freeablo engine is extracting monster and npc data.
 	
-	To deal with this, the DiabloExe component was created. In order for this to be version independent, the DiabloExe class uses a number of ini files to specify data locations. First the file is hashed to determine which version we are using, then the corresponding ini file is loaded according to that hash. These ini files contain the addresses of the relevant data within the file, which can then be loaded.
+	To deal with this problem, the DiabloExe component was created. In order for this to be version independent, the DiabloExe class uses a number of ini files to specify data locations. First the file is hashed to determine which version we are using, then the corresponding ini file is loaded according to that hash. These ini files contain the addresses of the relevant data within the file, which can then be loaded.
 	
 	By abstracting this process out into a generic loader class, we avoid having all sorts of nasty hex addresses cluttering up the source files where the information is actually needed.
 	
-	Of course, in order to load this information, you first need to know where it is, which can be a nontrivial task in itself. Fortunately, there has been extensive reverse engineering work done on diablo in the past. Much of the information needed has addresses documented on the website for The Dark Mod\cite{dmodhex}. Currently, freeablo only has an ini file for version 1.09 of Diablo, as that is the version documented in the above location (this is the second most recent patch for Diablo).
+	Of course, in order to load this information, one first needs to know where it is, which can be a nontrivial task in itself. Fortunately, there has been extensive reverse engineering work done on diablo in the past. Much of the information needed has addresses documented on the website for The Dark Mod\cite{dmodhex}. Currently, freeablo only has an ini file for version 1.09 of Diablo, as that is the version documented in the above location (this is the second most recent patch for Diablo).
 	
-	However, not all the necessary information is documented there, for example the locations of the NPCs in the tow had to be figured out unassisted. For this, the Hex Rays IDA\cite{hexrays} decompiler proved fantastically useful.
+	However, not all the necessary information is documented there, for example the locations of the NPCs in the town had to be figured out unassisted. For this, the Hex Rays IDA\cite{hexrays} decompiler proved fantastically useful.
 
 \section{FAIO}
 	The FAIO component is responsible for file IO in freeablo (or, more accurately, just input, as it does not allow file writing).
 	The game data files for Diablo are all stored in the DIABDAT.MPQ file. MPQ is a proprietary archive format originally developed by Blizzard for Diablo, and used in all their games since.
 	
 	Thankfully, a library exists for using these archives, named StormLib\cite{stormlib}. It provides an fopen / fread etc style api for mpq files.
-	FAIO is essentially a wrapper around this library, that allows the user to override files by placing them on the local filesystem. What this means is that when requested to open a file, it will search for the file in the local filesystem, and if it it finds it there, use that, otherwise look in the MPQ file.
+	FAIO is essentially a wrapper around this library, that allows the user to override files by placing them on the local filesystem. This means that when requested to open a file, it will search for the file in the local filesystem, and if it finds it there, use that, otherwise look in the MPQ file.
 	This behaviour is based on that of the BSA files in the Elder Scrolls game series.
 	
 \newpage
 	
 \section{Level Generation}
     Level generation in freeablo is performed in a number of stages. The first stage is the creation of a flat map. This is the part with interesting algorithms.
-    After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these are worth discussing.
+    After that, the map is turned isometric, and then has monsters place + random variance introduced into the tileset, but neither of these merit discussion.
 
     \mbox{}
 
@@ -93,7 +93,7 @@
         }
         \item
         {
-            We construct a graph of real rooms, where each rooms is connected to each other room. We then calculate the minimum spanning tree of this graph. Now we know that if we apply corridors corresponding to the edges on this graph, each room will be accessible from each other one.
+            We construct a graph of real rooms, where each room is connected to each other room. We then calculate the minimum spanning tree of this graph. Now we know that if we apply corridors corresponding to the edges on this graph, each room will be accessible from each other one.
         }
         \item
         {
@@ -101,8 +101,8 @@
         }
         \item
         {
-            For every edge on the graph, we create an l-shaped corridor on the map, joining the two rooms that correspond to that edges vertices.
-            This is where the corridor rooms come into effect. For each corridor room that the corridors intersect, we add the shape of that room onto the corridor. In this way, we end up with lumpy corridors that can resemble large rooms themselves, and do not just look like simple l shapes.
+            For every edge on the graph, we create an L-shaped corridor on the map, joining the two rooms that correspond to that edges vertices.
+            This is where the corridor rooms come into effect. For each corridor room that the corridors intersect, we add the shape of that room onto the corridor. In this way, we end up with lumpy corridors that can resemble large rooms themselves, and do not just look like simple L shapes.
         }
     \end{itemize}
     
@@ -137,4 +137,4 @@
         
         \subsection{StormLib}
         StormLib\cite{stormlib} is a library for accessing files in Blizzard MPQ format archives.
-        It was chosen as it is the only real option, others do exist, but are no longer maintained.
+        It was chosen because it is the only viable option. Others do exist, but are no longer maintained.

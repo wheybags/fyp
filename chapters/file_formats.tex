@@ -2,14 +2,14 @@
 In the following section, I will use stdint.h style names for naming data types with exact bit width.
 
 \section{PAL files}
-    PAL files are colour palettes used by the image formats in diablo. They always contain 256 colours, and each colour is 3 bytes long (r, g, and b bytes), so they are always 768 bytes long. Image files refer to them by index into the file (so, a two would represent the 3rd colour, or the third group of three bytes).
+    PAL files are colour palettes used by the image formats in diablo. They always contain 256 colours, and each colour is 3 bytes long (r, g, and b bytes), so they are always 768 bytes long. Image files refer to them by index into the file (thus, a two would represent the third colour, or the third group of three bytes).
 
 \section{CEL image files}
 	CEL image files use the CEL and CL2 file extensions. There are some minor differences between the two, but they are fundamentally the same. The basic capabilities of the format are run length encoding, and transparency (but only total transparency, not partial). Each file can contain multiple frames that can represent parts of an object, frames in an animation, or even tilesets for levels.
 
 	\subsection{File Header}
 	\label{sec:fileheaders}
-	The file header is composed of a series of uint32\_t. The first is the number of frames. This is followed by an offset from the start of the file for each frame, and finally, an offset to the end of the file. Illustrated below is a pseudo-C struct representing it's structure.
+	The file header is composed of a series of uint32\_t. The first is the number of frames. This is followed by an offset from the start of the file for each frame, and finally, an offset to the end of the file. Illustrated below is a pseudo-C struct representing its structure.
 	\begin{lstlisting}
 struct fileHeader
 
@@ -37,13 +37,13 @@ A colour in a CEL frame will always be a single byte index into a palette.
 	The command blocks contain instructions about what to do next during decoding. The data blocks contain indices into a palette to obtain a colour value.
 	
 	Decoding is performed by starting at the start of the file (the first block will always be a control block), and executing the command there. 
-	\\Then you advance by the number of blocks specified by the current block, which brings you to the next control block, and so on until you have decoded the entire frame. There are two kinds of control block: Regular and Transparency.
+	\\One advances by the number of blocks specified by the current block, which brings one to the next control block, and so on until the entire frame has been decoded. There are two kinds of control block: Regular and Transparency.
 	
-	\emph{Regular blocks} are denoted by values $\leq 127$. When you encounter a regular block, it's value indicates how many pixels it contains. For example, if you encounter a Regular block with value 10, the next 10 blocks are data blocks, one pixel each, and the 11th block after is the next control block.
+	\emph{Regular blocks} are denoted by values $\leq 127$. When encountering a regular block, its value indicates how many pixels it contains. For example, if one encounters a Regular block with value 10, the next 10 blocks are data blocks, one pixel each, and the 11th block after is the next control block.
 	
-	\emph{Transparency blocks} are denoted by values $> 127$. When a transparency block is encountered, it indicates $256-$block value transparent pixels. Transparency blocks do no use any data blocks, and so the immediate next block is the next control block.
+	\emph{Transparency blocks} are denoted by values $> 127$. When a transparency block is encountered, it indicates $256-$block value transparent pixels (for example, 250 would represent 6 transparent pixels). Transparency blocks do not use any data blocks, and so the immediate next block is the next control block.
 	
-	Below is a sample implementation of decoding a frame.
+	Below is a sample implementation of decoding a frame:
 	
 	\begin{lstlisting}
 // Frame is the raw frame from the file, pal is a palette
@@ -89,8 +89,8 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
 	
 	\item{Normal:} Some frames are normal frames as described in the previous section. These never have headers when contained in tileset CEL files.
 	
-	\item{Greater/Less than frames:} These are the most interesting frame type in cel files. They are the tiny triangles which make up half of an isometric block on the map. The name greater/less than is borrowed from ProjectDDT\cite{ddt}. \\
-\includegraphics{ltgt}\\ Above is an example of a less than and greater than frame respectively. As you can see, when placed together, they make up a 64*32 pixel isometric block.\\
+	\item{Greater/Less than frames:} These are the most interesting frame type in cel files, as they are the most specialised. They are the tiny triangles which make up half of an isometric block on the map. The name greater/less than is borrowed from ProjectDDT\cite{ddt}. \\
+\includegraphics{ltgt}\\ Above is an example of a less than and greater than frame respectively. It is possible to  see, when placed together, they make up a 64*32 pixel isometric block.\\
 You can tell if a frame is a less than or greater than frame by looking at the contents. A certain set of bytes will be zeroed in both cases.\\
 Less Than: bytes 0,1,8,9,24,25,48,49,80,81,120,121,168,169,224,225\\
 Greater Than: bytes 2,3,14,15,34,35,62,63,98,99,142,143,194,195\\
@@ -102,7 +102,8 @@ The yellow blocks are the bytes in between the markers, which contain colour ind
 	For a given less/greater than frame, the first half will always conform to the scheme described above, but this only shows half the image.
 	From there, there is variation. Some frames will have another half encoded the same way, with the following markers:\\
 	Less Than Second Half: bytes 288,289,348,349,400,401,444,445,480,481,508,509,528,529\\
-	Greater Than Second Half: bytes 245,255,318,319,374,375,422,423,462,463,494,495,518,519,534,535\\
+	Greater Than Second Half: bytes 245,255,318,319,374,375,422,423,462,463,494,495,518,\\
+	519,534,535\\
 	
 	If these markers are not present, however, the second half is raw with no transparency, so we can just pull it out directly, eg:\\
 	\includegraphics[scale=0.5]{rawtop}
@@ -111,7 +112,7 @@ The yellow blocks are the bytes in between the markers, which contain colour ind
 \newpage
 
 \subsection{CL2 Frames}
-	CL2 Frames are very similar to CEL frames, with the main difference that the use run-length encoding for colours as well as transparency. They also always have frame headers.
+	CL2 Frames are very similar to CEL frames. The main difference is the use of run-length encoding for colours as well as transparency. They also always have frame headers.
    In addition to the regular and transparency blocks used in normal CEL frames, they also have RLE blocks, which indicate the number of times to repeat the colour indicated by the next block.
    Below is some C++ code that illustrates this:
    
@@ -180,9 +181,9 @@ void cl2Decode(const std::vector<uint8_t>& frame,
  	We can abuse this fact, by starting at the start of the frame, and adding together each command block until we find one that is not 127. At that point the sum of the previous 127s + the current block is the width of the image, as the current block has to exist to split on a line.
  	
  	\subsection{CEL Archives}
- 	Some CEL and CL2 files are in fact archives of multiple CEL/CL2 files, respectively. These are used to store multiple rotations of an animation (eg walk animation in all 8 possible directions). These files have headers at the start, which consist of a number of uint32\_t s, each one pointing to a file contained in the archive.
+ 	Some CEL and CL2 files are in fact archives of multiple CEL/CL2 files, respectively. These are used to store multiple rotations of an animation (e.g. walk animation in all 8 possible directions). These files have headers at the start, which consist of a number of uint32\_t s, each one pointing to a file contained in the archive.
  	
- 	As there is always 8 images in such files, the first pointer will always be 32, as it will always point to the first byte after the headers, which are 8*4=32 bytes long, so it is possible to tell which files are archives by checking the first uint32\_t against 32.
+ 	As there are always 8 images in such files, the first pointer will always be 32, because it will always point to the first byte after the headers, which are 8*4=32 bytes long, so it is possible to tell which files are archives by checking the first uint32\_t against 32.
  	
  	For CEL files, that's all there is to it, but for CL2, it's a little more complicated. The archive header on CL2 archives points not to the data, but to the individual file headers (described in section \ref{sec:fileheaders}), which then point to the frames, relative to their own position.
 
@@ -208,7 +209,7 @@ struct Dun
     \end{lstlisting}
 
     \subsection{TIL files}
-    TIL files are also quite simple. they are just a massive array of int16\_t s, where each group of four is a block that can be referred to by the DUN file.
+    TIL files are also quite simple; they are just a massive array of int16\_t s, where each group of four is a block that can be referred to by the DUN file.
 
     \begin{lstlisting}
 struct TilBlock
@@ -221,15 +222,15 @@ struct TilBlock
 
 struct Til
 {
-    TilBlock blocks[FILESIZE/4];
+    TilBlock blocks[FILESIZE/sizeof(TilBlock)];
 };
     \end{lstlisting}
 
     \subsection{MIN files}
     MIN files are slightly awkward in that their size is not set. In l4.min and town.min, each entry is of size 16, but for all others they are 10.
-    MIN files essentially are a list of blocks, recording the cel frame indices used for each. They are each a pillar with two images on each level, allowing a block to have things up above it (eg, a tree). They start at the top and work down, as illustrated in the image below:\\
+    MIN files essentially are a list of blocks, recording the cel frame indices used for each. They are each a pillar with two images on each level, allowing a block to have things up above it (e.g. a tree). They start at the top and work down, as illustrated in the image below:\\
     \includegraphics{minpillar}
     
     \subsection{SOL files}
     SOL files have not been fully figured out, however they are used because we can get some useful information out of them.
-    Each byte in the SOL file is a bit field corresponding to an entry in the MIN file. Currently the only known value is the least significant bit, which indicates if a block is "passable" by the player and npcs (ie ground is passable, a wall isn't). A 0 in this position indicates that the block is passable, a 1 that it is not.
+    Each byte in the SOL file is a bit field corresponding to an entry in the MIN file. Currently the only known value is the least significant bit, which indicates if a block is "passable" by the player and npcs (i.e. ground is passable, a wall isn't). A 0 in this position indicates that the block is passable, a 1 that it is not.
