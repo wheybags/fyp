@@ -96,13 +96,26 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
 	\item{Normal:} Some frames are normal frames as described in the previous section. These never have headers when contained in tileset CEL files.
 	
 	\item{Greater/Less than frames:} These are the most interesting frame type in cel files, as they are the most specialised. They are the tiny triangles which make up half of an isometric block on the map. The name greater/less than is borrowed from ProjectDDT\cite{ddt}. \\
-\includegraphics{ltgt}\\ Above is an example of a less than and greater than frame respectively. It is possible to  see, when placed together, they make up a 64*32 pixel isometric block.\\
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{ltgt}
+	\caption{Less / Greater than example frames}
+\end{figure}
+
+ Above is an example of a less than and greater than frame respectively. It is possible to  see, when placed together, they make up a 64*32 pixel isometric block.\\
 You can tell if a frame is a less than or greater than frame by looking at the contents. A certain set of bytes will be zeroed in both cases.\\
 Less Than: bytes 0,1,8,9,24,25,48,49,80,81,120,121,168,169,224,225\\
 Greater Than: bytes 2,3,14,15,34,35,62,63,98,99,142,143,194,195\\
 
-	These bytes are clearly in pairs. I got these indices from the source of ProjectDDT\cite{ddt}. Each pair marks the end of two rows of colour, as shown in the image below:\\
-\includegraphics[scale=0.3]{ltgt-markers}\\
+	These bytes are clearly in pairs. I got these indices from the source of ProjectDDT\cite{ddt}. Each pair marks the end of two rows of colour, as shown in the figure below:\\
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.3]{ltgt-markers}
+		\caption{Less / Greater than markers example}
+	\end{figure}
+	
 The yellow blocks are the bytes in between the markers, which contain colour indices, the red are the markers themselves. When rendering, these are ignored, so all non-yellow blocks are transparent.
 
 	For a given less/greater than frame, the first half will always conform to the scheme described above, but this only shows half the image.
@@ -112,7 +125,13 @@ The yellow blocks are the bytes in between the markers, which contain colour ind
 	519,534,535\\
 	
 	If these markers are not present, however, the second half is raw with no transparency, so we can just pull it out directly, eg:\\
-	\includegraphics[scale=0.5]{rawtop}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.5]{rawtop}
+		\caption{Example frame with a raw top}
+	\end{figure}
+	
 \end{itemize}
 
 \newpage
@@ -199,8 +218,12 @@ void cl2Decode(const std::vector<uint8_t>& frame,
     Levels in diablo are stored in a number of files. To begin with, there is the hierarchy of DUN, TIL and MIN files.
     DUN files are the top level map file, which contain blocks that refer to the corresponding TIL file. Each entry in the TIL file is for tiles on the map, and each of those tiles is defined in the MIN file. The MIN file defines the sprites that make up the tile (total of 16). This is illustrated in the image below:\\
     
-    \begin{center}\includegraphics[scale=0.6]{level}\end{center}
-    
+    \begin{figure}[H]
+    	\centering
+    	\includegraphics[scale=0.6]{level}
+    	\caption{Level File Hierarchy}
+   	\end{figure}
+   	
     The properties of each tile is defined in the SOL file.
 
     \subsection{DUN files}
@@ -234,8 +257,12 @@ struct Til
 
     \subsection{MIN files}
     MIN files are slightly awkward in that their size is not set. In l4.min and town.min, each entry is of size 16, but for all others they are 10.
-    MIN files essentially are a list of blocks, recording the cel frame indices used for each. They are each a pillar with two images on each level, allowing a block to have things up above it (e.g. a tree). They start at the top and work down, as illustrated in the image below:\\
-    \includegraphics{minpillar}
+    MIN files essentially are a list of blocks, recording the cel frame indices used for each. They are each a pillar with two images on each level, allowing a block to have things up above it (e.g. a tree). They start at the top and work down, as illustrated in the figure below:\\
+	\begin{figure}
+		\centering    
+    	\includegraphics[scale=0.5]{minpillar}
+    	\caption{Min Pillar format}
+   	\end{figure}    	
     
     \subsection{SOL files}
     SOL files have not been fully figured out, however they are used because we can get some useful information out of them.

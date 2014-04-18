@@ -12,7 +12,11 @@
     
     The second part is the code that controls the actual rendering for the game. This is located in apps/freeablo/farender. Essentially, this contains a class FARender::Renderer, that manages sprite loading and render looping for the game engine.
     
-    \begin{center}\includegraphics[scale=0.4]{renderer}\end{center}
+    \begin{figure}[H]
+    	\centering
+    	\includegraphics[scale=0.3]{renderer}
+    	\caption{Renderer UML Diagram}
+    \end{figure}
       
     When created, the Renderer class starts up a separate thread, which then loops until the object is destroyed. Each iteration, the renderer will draw the level, and a list of objects, which are essentially just sprites and locations.
     The game engine communicates with the renderer through a triple buffered system.
@@ -33,11 +37,15 @@
     When that function returns, it will assign mThreadCommunticationTmp the pointer to the new heap Sprite, and set mRenderThreadState back to running.
     The game thread will now see that it has completed, and return the sprite as required.
         
-    \section{Input}
-    
-    \begin{center}\includegraphics[scale=0.5]{inputmanager}\end{center}
+    \section{Input}    
     Input is handled in the game loop thread, with the Input::InputManager singleton class. Like rendering, it is done using SDL, so it is also abstracted away in the Input component.
     The input component consists of an object to which one binds callbacks. These callbacks are then executed when the processInput() method is called, if the corresponding input actions have occurred.
+    
+    \begin{figure}[H]
+    	\centering
+    	\includegraphics[scale=0.5]{inputmanager}
+    	\caption{InputManager UML Diagram}
+    \end{figure}
   	
   	Unfortunately, while the input is used in the game loop thread, the specifics of SDL require that the SDL event polling occur on the main thread. As such, the raw input polling is done inside the render loop, by calling poll(). 
   	For each SDL event generated in the render loop, an event is added onto a concurrent queue. The events on this queue are contained in a structure that very much resembles the parts of the SDL\_Event union that we actually use.
@@ -111,9 +119,12 @@
         }
     \end{itemize}
     
-    Example levels generated:\\ 
-    \includegraphics[scale=0.2]{rnd1}\\   
-    \includegraphics[scale=0.2]{rnd2}\\
+    \begin{figure}[H]
+    	\centering
+    	\includegraphics[scale=0.3]{rnd1}
+    	\caption{Example of generated level}
+    \end{figure} 
+
     
    	\newpage
     
