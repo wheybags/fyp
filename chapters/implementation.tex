@@ -10,18 +10,21 @@
     
     \mbox{}
     
-    The second part is the code that controls the actual rendering for the game. This is located in apps/freeablo/farender. Essentially, this contains a class FARender::Renderer, that manages sprite loading and render looping for the game engine.  
+    The second part is the code that controls the actual rendering for the game. This is located in apps/freeablo/farender. Essentially, this contains a class FARender::Renderer, that manages sprite loading and render looping for the game engine.
+    
+    \begin{center}\includegraphics[scale=0.4]{renderer}\end{center}
+      
     When created, the Renderer class starts up a separate thread, which then loops until the object is destroyed. Each iteration, the renderer will draw the level, and a list of objects, which are essentially just sprites and locations.
     The game engine communicates with the renderer through a triple buffered system.
     
+    \subsection{Triple Buffering}
     The Renderer creates three RenderState objects, each of which is just a container for a number of sprites and their corresponding locations, and a location on which to centre the camera.
     Each iteration of the game loop, after processing the game logic for the current tick, the engine will "fill" a render state, and pass it off to the renderer. This filling is basically just a flattening of game state, removing all information about objects other than sprite and location, and dumping it into the state.
     Three states are used, as at any given point the renderer can be drawing a state, and the game loop can be filling one, so with three we are always guaranteed to have one free.
     Locks are used when rendering and filling a state to ensure that we are never reading and writing the same state at the same time.
     As the game and render loops can (and probably are) iterating at different rates, when the render loop is going faster, some render states will never be drawn to screen, but this is acceptable, as whatever is on screen at any given moment is an accurate portrayal of game state to the granularity allowed by the iteration speed of the renderer, which is determined by the speed of the processor and GPU (no framelimit is set on the renderer).
     
-    \mbox{}
-    
+    \subsection{Threading Issues}
     It is a requirement of the library that all SDL calls occur in the main thread, so there are some synchronisation issues with various actions such as loading sprites and changing level. The restriction that it be the main thread is the reason that rendering takes place in the main thread, with the game loop occurring in a separate one, which at first seems counterintuitive.
     Each action that must take place in the render thread, but is called from the game thread is given an entry in the RenderThreadState enum. The Renderer class has a member, mRenderThreadState, which is an atomic instance of the RenderThreadState enum type (atomicity achieved using boost::atomic). On each iteration of the render loop, the value of this synchronisation variable is checked. When it is set to running, the game can render the frame, otherwise, it executes the action corresponding to the current value, then resets itself to allow the render to continue, and the caller to know that it has completed execution. Passing values between threads is done via a void* member called mThreadCommunticationTmp.
     
@@ -31,6 +34,8 @@
     The game thread will now see that it has completed, and return the sprite as required.
         
     \section{Input}
+    
+    \begin{center}\includegraphics[scale=0.5]{inputmanager}\end{center}
     Input is handled in the game loop thread, with the Input::InputManager singleton class. Like rendering, it is done using SDL, so it is also abstracted away in the Input component.
     The input component consists of an object to which one binds callbacks. These callbacks are then executed when the processInput() method is called, if the corresponding input actions have occurred.
   	

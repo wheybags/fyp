@@ -14,21 +14,4 @@
 		\item{Animation}
 	\end{itemize}
 	
-	I believe that this set of features adequately encompasses the objective of creating a base engine which can be expanded in the future.
-	
-	\section{Future Work}
-	I intend to turn the existing codebase into a proper open source project, drawing outside contributors after the fashion of OpenMW\cite{openmw}. The large remaining tasks are the implementation of a GUI system, and combat.
-	Once a basic GUI and combat are present, work can begin on porting in all the various bits of game mechanics, such as the appropriate formulae for damage, chance to hit, etc. The excellent work of Pedro Faria / Jarulf on Jarulf's Guide to Diablo and Hellfire\cite{jarulf} will be invaluable in this.
-	Audio and lighting are some more aesthetic features that will have to be carried out in the future.
-	
-	Level generation currently only generates levels from the first section of the game - the catacombs. The level generator will have to be tweaked to produce levels for the rest of the game as well.
-	
-	The goal initially would be simply to create a feature complete implementation capable of nothing more than the original engine. Once that goal is accomplished fully, work can begin on extensions, such as an interface for mods, and non-Diablo games to be played using the engine.
-	This could be accomplished by the integration of a scripting language into the engine, along with support for modern file formats such as png. 
-	Further to this, it would be desirable to have all of the diablo-specific code factored out of the main engine, and loaded in at runtime as a module. This would mean porting all the image decoding and game mechanics into the scripting language chosen.
-	
- 	Having game code factored out from engine code, and having a system where games can be loaded as modules is of course only useful if there are games created using the engine. For this purpose, and the purpose of making modifications to existing games, it would be desirable if a mod creation and packaging tool could be developed.
- 	This could include a level editor, a sprite editor, and tools for managing various media files that may be used by the game.
- 	
- 	Further work will have to be done in order to create ini files containing the relevant hex addresses for all the released versions of DIABLO.EXE. Support for hellfire (an expansion pack for the original game) would also be useful, once the base game is fully supported.
-	
+	The main file formats have been reverse engineered, and the Level and Cel namespaces contain code for decoding them. The freeablo game engine successfully takes the assets decoded by these, and implements an isometric renderer capable fo displaying them as a game world. The FALevelGen component takes care of the last major concer, which is of course level generation.

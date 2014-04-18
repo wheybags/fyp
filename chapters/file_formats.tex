@@ -1,5 +1,11 @@
 \chapter{File Formats}
 In the following section, I will use stdint.h style names for naming data types with exact bit width.
+We will be looking at the file formats used by Diablo to describe image data (CEL, CL2), and levels (DUN, MIN, TIL, SOL).
+The image file decoding was originally implemented according to an incomplete spec\cite{celspec}, that I found on the internet, coupled with trial and error. Later, when working on the level files, I found blizzconv\cite{blizzconv}, which contained a pretty much complete implementation in go of the image and level formats that I could work off.
+
+Heuristics for determining image width were implemented by trial and error, with some pointers from the spec mentioned above.
+
+The below specifications were producd by looking at the code that I had written, once I had finished implementing them.
 
 \section{PAL files}
     PAL files are colour palettes used by the image formats in diablo. They always contain 256 colours, and each colour is 3 bytes long (r, g, and b bytes), so they are always 768 bytes long. Image files refer to them by index into the file (thus, a two would represent the third colour, or the third group of three bytes).
@@ -85,7 +91,7 @@ void CelFile::normal_decode(vector<uint8_t>& frame, Pal pal, vector<colour>& raw
 	These CEL files have the same format as normal CEL files, but the data in the frames is different. There are a number of possible "types" of frame within tileset CEL files. All of them are always of width and height 32.
 \begin{itemize}
 
-	\item{Raw:} Raw frames are just that, 32*32=1024 bytes of raw colours, with no transparency. 
+	\item{Raw:} Raw frames are just that, 32*32=1024 bytes of raw colours, with no transparency. A heuristic to identify this kind of frame is to look for frames whose size is exactly 1024 bytes,  which works in most cases, but is not completely reliable. blizzconv\cite{blizzconv} deals with this issue by storing the frame type for each frame in each tileset CEL file in an ini file written in advance.
 	
 	\item{Normal:} Some frames are normal frames as described in the previous section. These never have headers when contained in tileset CEL files.
 	
@@ -95,7 +101,7 @@ You can tell if a frame is a less than or greater than frame by looking at the c
 Less Than: bytes 0,1,8,9,24,25,48,49,80,81,120,121,168,169,224,225\\
 Greater Than: bytes 2,3,14,15,34,35,62,63,98,99,142,143,194,195\\
 
-	These bytes are clearly in pairs. Each pair marks the end of two rows of colour, as shown in the image below:\\
+	These bytes are clearly in pairs. I got these indices from the source of ProjectDDT\cite{ddt}. Each pair marks the end of two rows of colour, as shown in the image below:\\
 \includegraphics[scale=0.3]{ltgt-markers}\\
 The yellow blocks are the bytes in between the markers, which contain colour indices, the red are the markers themselves. When rendering, these are ignored, so all non-yellow blocks are transparent.
 

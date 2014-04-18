@@ -13,10 +13,24 @@
 	Another deficiency in the original engine is its total lack of mod support. Almost all the file formats that were used for the games content were proprietary, with no documentation or tools provided for editing them, and the game logic was completely inaccessible by being locked down into a compiled binary. This however, did not stop the modding community, who managed to reverse engineer much of the game code, and to decode the proprietary content file formats as well.
 
 	\section{Goals}	
-	The greater aim of this project is to create a modern engine that addresses these issues. Specifically, to create an engine using modern libraries, which is portable across platforms, is friendly to modifications without having to be recompiled, and is released under a permissive license (GPLv3 was chosen for this purpose).
-	The long term aim is to attract contributors from the community to help build the engine as it is envisioned. For the duration of this final year project however, the goal is set a little lower, as a fully feature complete engine would simply take too long. The goal therefore, is to create a working base for the engine.
+	The greater aim of this project is to create a modern engine that addresses the issues mentioned above (unmoddable, unusable on moder platforms, etc.) More specifically, the aim is to create an engine using modern libraries, which is portable across platforms, is friendly to modifications without having to be recompiled, and is released under a permissive license (GPLv3 was chosen for this purpose).
+	The long term aim is to attract contributors from the community to help build the engine as it is envisioned. For the duration of this final year project however, the goal is set a little lower, as a fully feature complete engine would simply take too long. The goal therefore, is to create a working base for the engine.\\
+To do this, the main tasks are:
+	\begin{itemize}
+		\item to reverse engineer the main important file formats for levels and images,
+		\item implement a C++ library for decoding said formats,
+		\item build a game engine to render these decoded assets as levels and characters,
+		\item create the random dungeon generator, which is the hallmark of Diablo, and the roguelike genre.
+	\end{itemize}
 	
-	To do this, the main tasks are to reverse engineer the main important file formats for levels and images, and implement a C++ library for decoding them, build a game engine to render these decoded assets as levels and characters, and create the random dungeon generator, which is the hallmark of Diablo, and the roguelike genre.
+	The game engine itself should use a modern cross platform api for rendering, to allow it to be cross platform, and also to allow it to make use of today's specialised graphics hardware. It should be as modular as possible, to allow it to be used in the future to build isometric games in general, and especially the Diablo specific code should be factored out for easy removal / replacement.
+	The engine should be well designed, with readable code in order to attract developers in the future.
 	
 	\section{Report Roadmap}
-	In the remainder of this report, an attempt shall be made to document the design architecture of the engine  implemented, including the choices that were made, and the reasons for them. The level generation algorithm will be outlined. Finally, the various file formats that were reverse engineered in the course of the project shall be documented as fully as possible, with the intention being to provide enough information that the reader could implement decoders themselves.
+	In the remainder of this report, an attempt shall be made to document the design architecture of the engine  implemented, including the choices that were made, and the reasons for them. The level generation algorithm will be outlined. Finally, the various file formats that were reverse engineered in the course of the project shall be documented.\\
+	Chapter 2 will introduce some similar efforts, and evaluate them with respect to this project.\\
+	Chapter 3 will give a brief overview of the architecture of the engine.\\
+	Chapter 4 will contain details about the implementation, algorithms used, etc. \\
+	Chapter 5 is devoted to the file formats that are used by the engine. This section is deigned to be usable as a reference by someone who wishes to implement decoders for these formats themselves, and is intended to provide enough information that they would be able to do so without further research of their own.\\
+	Chapter 6 will give an evaluation of the project as it stands, with respect to the original goals stated at the start of the report.\\
+	Chapter 7 will be the conclusion, and discuss future work.

@@ -1,5 +1,5 @@
   \chapter{Design}
-    The engine should support python scripting, to allow extension of the engine, and of games created for the engine.
+    The engine should support some kind of scripting in the future, to allow extension of the engine, and of games created for the engine. I would be biased here towards python, because of personal preference, but LUA, or something else entirely could be a valid choice here.
     File formats used by the game should be simple text formats, like the formats used in Fifengine.
     The engine should be divided into a number of modules.
     
@@ -17,3 +17,10 @@
         \item{FALevelGen - responsible for generating random dungeons}
         \item{FARender - controls rendering to screen}
     \end{itemize}
+
+	\begin{center}\includegraphics[scale=0.45]{architecture.png}\end{center}
+	
+	\section{Interaction}
+	Render and Input are tightly coupled, due to both being supplied by SDL.
+	A number of the components use other components (for example, Cel uses FAIO to load the unprocessed image data from the MPQ file).
+	Apps are allowed to depend on Components, but not vice-versa.
