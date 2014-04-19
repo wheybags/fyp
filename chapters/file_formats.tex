@@ -5,7 +5,7 @@ The image file decoding was originally implemented according to an incomplete sp
 
 Heuristics for determining image width were implemented by trial and error, with some pointers from the spec mentioned above.
 
-The below specifications were producd by looking at the code that I had written, once I had finished implementing them.
+The below specifications were produced by looking at the code that I had written, once I had finished implementing them.
 
 \section{PAL files}
     PAL files are colour palettes used by the image formats in diablo. They always contain 256 colours, and each colour is 3 bytes long (r, g, and b bytes), so they are always 768 bytes long. Image files refer to them by index into the file (thus, a two would represent the third colour, or the third group of three bytes).
@@ -134,7 +134,6 @@ The yellow blocks are the bytes in between the markers, which contain colour ind
 	
 \end{itemize}
 
-\newpage
 
 \subsection{CL2 Frames}
 	CL2 Frames are very similar to CEL frames. The main difference is the use of run-length encoding for colours as well as transparency. They also always have frame headers.
